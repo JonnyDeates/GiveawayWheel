@@ -1,0 +1,78 @@
+<div id="wheelWrapper">
+  <canvas id="cnvs" height="720" width="720"></canvas>
+  <div id="dial"><img src="/assets/dial/dial.png" [width]="settingInputs.dialSize" [height]="settingInputs.dialSize"></div>
+</div>
+<div id="winnerModal" class="disabled" (click)="disableModal()">
+  <div>{{winnerModal.winnerText}} {{winnerModal.winner}}</div>
+</div>
+<div id="spinbtn" (click)="spinWheel()">SPIN!</div>
+<div class="row center">
+  <div id="tabButtons" class="tabButtons">
+    <div *ngFor="let tab of tabs; let i = index" (click)="changeTab(tab, i)">{{tab}}</div>
+  </div>
+  <div id="contestantsTab">
+    <span>Contestant: </span>
+    <input type="text" (keyup.enter)="addContestant()" [(ngModel)]="contestant">
+    <a class="btn waves-effect waves-light right" (click)="addContestant()" style="background-color:#000000;"><i
+      class="material-icons">add</i></a>
+    <div id="contestantsTabTable" class="namesTabTable">
+      <h6>Contestants</h6>
+      <div *ngFor="let contestant of contestants">
+        <div class="name">{{contestant.name}}</div>
+        <a (click)="removeSelectedContestant(contestant.name)">X</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="colorsTab" class="disabled">
+    <span>Color</span>
+    <input id="sliceColor" type="color" [(ngModel)]="color">
+    <input type="DOMString" [(ngModel)]="color" (keyup.enter)="addColor();">
+    <a class="btn waves-effect waves-light right" style="background-color:#000000;" (click)="addColor()"><i
+      class="material-icons">add</i></a>
+    <ul class="colorselect-dropdown"> {{colorSelector}}
+      <li *ngFor="let pattern of colorPatterns; let i = index;" [style.margin-top]="i*44+'px'"
+          (click)="selectPattern(pattern)">{{pattern}}
+      </li>
+    </ul>
+    <div id="colorsTabTable" class="colorsTabTable">
+      <h6>Colors</h6>
+      <div *ngFor="let color of colors" [style.background-color]="color">
+        <div>{{color}}</div>
+        <a (click)="removeSelectedColor(color)">X</a>
+      </div>
+    </div>
+  </div>
+  <div id="settingsTab" class="disabled">
+    <div class="tabHeader">Site Colors
+      <div>Background: <input id="bgColor" type="color" [(ngModel)]="settingInputs.bgColor"></div>
+      <div>Accent: <input id="acColor" type="color" [(ngModel)]="settingInputs.acColor"></div>
+      <div>Font: <input id="fontColor" type="color" [(ngModel)]="settingInputs.fontColor"></div>
+      <div>Spin Button: <input id="sBColor" type="color" [(ngModel)]="settingInputs.sBColor"></div>
+    </div>
+    <div class="tabHeader"> Wheel
+      <div>Size: <input id="wheelSize" type="number" [(ngModel)]="settingInputs.wheelSize">px
+      </div>
+      <div>Speed: <input type="number" [(ngModel)]="settingInputs.spinRate">rps</div>
+      <div>Time: <input type="number" [(ngModel)]="settingInputs.spinTime">s</div>
+    </div>
+    <div class="tabHeader">Dial
+      <!--<div>Size: <input id="dialSize" type="number" [(ngModel)]="settingInputs.dialSize">px</div>-->
+      <div>Orientation:
+        <div id="settingsTabOTable" *ngFor="let row of dialOrientation; let x = index"><span
+          *ngFor="let col of row; let y = index" (click)="setDialOrientation(x,y, col)">{{col}}</span></div>
+      </div>
+    </div>
+    <div class="tabHeader">Winner Slide
+      <div>Background Wrapper Color:  <input id="mWColor" type="color" [(ngModel)]="settingInputs.mWColor"></div>
+      <div>Background Color:  <input id="mColor" type="color" [(ngModel)]="settingInputs.mColor"></div>
+      <div>Font: <input id="mFColor" type="color" [(ngModel)]="settingInputs.mFColor"></div>
+      <!--<div>Background:-->
+      <!--<ul class="winnerbg-dropdown">-->
+      <!--<li></li>-->
+      <!--</ul>-->
+      <!--</div>-->
+      <div>Winner Text: <input id='winnerInput' type="text" [(ngModel)]="winnerModal.winnerText"></div>
+    </div>
+  </div>
+</div>
