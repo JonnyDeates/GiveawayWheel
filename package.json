@@ -1,6 +1,6 @@
 {
-  "name": "giveaway-site",
-  "version": "0.0.0",
+  "name": "giveawaywheel",
+  "version": "0.8.9",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -43,5 +43,17 @@
     "ts-node": "~7.0.0",
     "tslint": "~5.15.0",
     "typescript": "~3.4.3"
-  }
+  },
+  "description": "A wheel for picking a random entry through the process of spinning a wheel. The wheel has a lot of customizeable options.",
+  "main": "karma.conf.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JonnyDeates/GiveawayWheel.git"
+  },
+  "author": "Jonny Deates",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JonnyDeates/GiveawayWheel/issues"
+  },
+  "homepage": "https://github.com/JonnyDeates/GiveawayWheel#readme"
 }

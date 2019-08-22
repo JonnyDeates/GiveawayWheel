@@ -456,22 +456,23 @@ export class AppComponent implements AfterViewInit {
     if (col.includes('X')) {
       return;
     } else if (col.includes('R')) {
-      let x2 = Math.floor(Math.random() * this.dialOrientation.length);
-      let y2 = Math.floor(Math.random() * this.dialOrientation.length);
-      this.setDialOrientation(x2, y2, this.dialOrientation[x2, y2]);
+      const x2 = Math.floor(Math.random() * this.dialOrientation.length);
+      const y2 = Math.floor(Math.random() * this.dialOrientation.length);
+      return this.setDialOrientation(x2, y2, this.dialOrientation[x2][y2]);
     } else {
-      let dialLocationValues = [[225, 270, 315], [180, null, 0], [135, 90, 45]];
+      const dialLocationValues = [[225, 270, 315], [180, null, 0], [135, 90, 45]];
       this.wheelRotation.dialLocation = dialLocationValues[x][y];
       for (let i = 0; i < this.dialOrientation.length; i++) {
         for (let j = 0; j < this.dialOrientation[i].length; j++) {
-          if (!this.dialOrientation[i][j].includes('R'))
-            this.dialOrientation[i][j] = 'O'
+          if (!this.dialOrientation[i][j].includes('R')) {
+            this.dialOrientation[i][j] = 'O';
+          }
         }
       }
-      this.dialOrientation[x][y] = 'X'
+      this.dialOrientation[x][y] = 'X';
       this.changeOrientation();
     }
-
+    return;
   }
 
   setDialSize() {
@@ -498,8 +499,8 @@ export class AppComponent implements AfterViewInit {
     document.getElementById('winnerModal').getElementsByTagName('div')[0].style.backgroundColor = this.settingInputs.mColor; // Sets the Winner Modal Background
     document.getElementById('winnerModal').style.color = this.settingInputs.mFColor; // Sets the Settings Table
     console.log(document.getElementsByClassName('tabHeader')); // Sets the Settings Table
-    for (let doc of document.getElementsByClassName('tabHeader')) {
-      doc.style.borderBottom = this.colorLum(this.settingInputs.acColor, 0.2) + '1px dashed';
+    for (let i = 0; i <  document.getElementsByClassName('tabHeader').length; i++) {
+      document.getElementsByClassName('tabHeader').item(0).getElementsByTagName('div')[i].style.borderBottom = this.colorLum(this.settingInputs.acColor, 0.2) + '1px dashed';
     }
     document.getElementById('tabButtons').style.backgroundColor = this.settingInputs.acColor; // Sets the tab buttons
     document.getElementById('tabButtons').style.color = this.settingInputs.fontColor; // Sets the tab buttons
@@ -524,7 +525,7 @@ export class AppComponent implements AfterViewInit {
   // Spin Function
   spinWheel() {
     this.wheelRotation.counter = 0;
-    this.wheelRotation.rate = JSON.parse(JSON.stringify(this.settingInputs.spinRate) * 1.238756);
+    this.wheelRotation.rate = parseFloat(JSON.parse(JSON.stringify(this.settingInputs.spinRate))) * 1.238756;
     document.getElementById('spinbtn').classList.add('disabled'); // Adds the field of disabled to the Spin Button
     this.wheelRotation.timer = (100 * this.settingInputs.spinTime); // The total timer, each 10 is a second, each digit increase is a 10 degree turn. 36 = 3.6 seconds and a complete 360 degree rotation if the rate is at 1.
     const intervalId = setInterval(() => this.rotateWheel(intervalId, this.wheelRotation.timer), 1);
