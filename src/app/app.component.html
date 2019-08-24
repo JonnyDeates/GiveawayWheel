@@ -12,7 +12,7 @@
   </div>
   <div id="contestantsTab">
     <span>Contestant: </span>
-    <input type="text" (keyup.enter)="addContestant()" [(ngModel)]="contestant">
+    <input class="text-input" type="text" (keyup.enter)="addContestant()" [(ngModel)]="contestant">
     <a class="add-btn" (click)="addContestant()">+</a>
     <div id="contestantsTabTable" class="namesTabTable">
       <h6>Contestants</h6>
@@ -26,7 +26,7 @@
   <div id="colorsTab" class="disabled">
     <span>Color</span>
     <input id="sliceColor" type="color" [(ngModel)]="color">
-    <input type="DOMString" [(ngModel)]="color" (keyup.enter)="addColor();">
+    <input class="text-input" type="DOMString" [(ngModel)]="color" (keyup.enter)="addColor();">
     <a class="add-btn" (click)="addColor()">+</a>
     <ul class="colorselect-dropdown"> {{colorSelector}}
       <li *ngFor="let pattern of colorPatterns; let i = index;" [style.margin-top]="i*44+'px'"
@@ -43,7 +43,7 @@
   </div>
   <div id="settingsTab" class="disabled">
     <div class="tabHeader">Site Colors
-      <div>Background: <input id="bgColor" type="color" [(ngModel)]="settingInputs.bgColor"></div>
+      <div >Background: <input id="bgColor" type="color" [(ngModel)]="settingInputs.bgColor"> Chroma Key: <div class="template-color" [style.background-color]='"rgb(0, 177, 64)"' (click)="resetBgColor()"></div></div>
       <div>Accent: <input id="acColor" type="color" [(ngModel)]="settingInputs.acColor"></div>
       <div>Font: <input id="fontColor" type="color" [(ngModel)]="settingInputs.fontColor"></div>
       <div>Spin Button: <input id="sBColor" type="color" [(ngModel)]="settingInputs.sBColor"></div>

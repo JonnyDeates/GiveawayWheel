@@ -22,7 +22,6 @@ export class AppComponent implements AfterViewInit {
   colorPatterns: any;
   contestant: string;
   dialOrientation: any;
-
   // Tabs
   tabs: any;
   settingInputs: any;
@@ -43,6 +42,8 @@ export class AppComponent implements AfterViewInit {
     this.cssAnimation = document.createElement('style');
     this.dialOrientation = [['O', 'O', 'O'], ['O', 'R', 'X'], ['O', 'O', 'O']];
 
+
+
     this.settingInputs = {
       bgColor: '#00b140',
       sBColor: '#c3ecf8',
@@ -53,7 +54,7 @@ export class AppComponent implements AfterViewInit {
       fontColor: '#000000',
       wheelSize: 720,
       fontSize: 48,
-      spinTime: 100,
+      spinTime: 10,
       spinRate: 1.1,
       dialSize: 50,
       dialLocation: 0
@@ -80,14 +81,13 @@ export class AppComponent implements AfterViewInit {
     } else {
       this.colors = JSON.parse(sessionStorage.getItem('colors'));
     }
-
     this.resetColors();
     this.cssAnimation.type = 'text/css';
   }
 
   ngAfterViewInit() {
     document.body.style.backgroundColor = this.settingInputs.bgColor; // Green Screen Color
-    this.canvas = <HTMLCanvasElement> document.getElementById('cnvs'); // Gets the Canvas Element
+    this.canvas = document.getElementById('cnvs') as HTMLCanvasElement; // Gets the Canvas Element
     this.ctx = this.canvas.getContext('2d'); // Context is 2d for the canvas
     this.changeOrientation();
     this.refreshWheel(); // Calls the function Refresh Wheel
@@ -352,7 +352,7 @@ export class AppComponent implements AfterViewInit {
     context.lineWidth = 5
     if (!!(this.settingInputs.customImage)) {
       context.strokeStyle = 'gray';
-      context.stroke()
+      context.stroke();
     } else {
       context.fillStyle = this.contestants[i].sColor; // Finds the color of the slice
       context.fill(); // Fills the color
@@ -390,7 +390,10 @@ export class AppComponent implements AfterViewInit {
     // this.colors = JSON.parse(localStorage.getItem('colors'));
     this.refreshWheel();
   }
-
+  resetBgColor(){
+    this.settingInputs.bgColor = 'rgb(0,177,64)';
+    document.body.style.backgroundColor = this.settingInputs.bgColor;
+  }
   // Resets the Colors
   resetColors() {
     let colorsUsed = this.colorSelection(this.colorSelector);
