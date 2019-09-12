@@ -43,15 +43,12 @@
   </div>
   <div id="settingsTab" class="disabled">
     <div class="tabHeader">Site Colors
-      <div >Background: <input id="bgColor" type="color" [(ngModel)]="settingInputs.bgColor"> Chroma Key: <div class="template-color" [style.background-color]='"rgb(0, 177, 64)"' (click)="resetBgColor()"></div></div>
+      <div >Background: <input id="bgColor" type="color" [(ngModel)]="settingInputs.bgColor"> Chroma Key: <div class="template-color" [style.background-color]='"#00b140"' (click)="resetBgColor()"></div></div>
       <div>Accent: <input id="acColor" type="color" [(ngModel)]="settingInputs.acColor"></div>
       <div>Font: <input id="fontColor" type="color" [(ngModel)]="settingInputs.fontColor"></div>
       <div>Spin Button: <input id="sBColor" type="color" [(ngModel)]="settingInputs.sBColor"></div>
     </div>
     <div class="tabHeader"> Wheel
-      <div>Size: <input id="wheelSize" type="number" [(ngModel)]="settingInputs.wheelSize">px
-      </div>
-      <div>Speed: <input type="number" [(ngModel)]="settingInputs.spinRate">rps</div>
       <div>Time: <input type="number" [(ngModel)]="settingInputs.spinTime">s</div>
     </div>
     <div class="tabHeader">Dial

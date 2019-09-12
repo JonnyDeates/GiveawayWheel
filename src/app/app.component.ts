@@ -42,8 +42,6 @@ export class AppComponent implements AfterViewInit {
     this.cssAnimation = document.createElement('style');
     this.dialOrientation = [['O', 'O', 'O'], ['O', 'R', 'X'], ['O', 'O', 'O']];
 
-
-
     this.settingInputs = {
       bgColor: '#00b140',
       sBColor: '#c3ecf8',
@@ -59,6 +57,8 @@ export class AppComponent implements AfterViewInit {
       dialSize: 50,
       dialLocation: 0
     };
+
+
     this.tabs = ['Contestants', 'Colors', 'Settings'];
     this.wheelRotation = {dialLocation: 0, rate: 1.1, timer: 0, counter: 0, totalRot: 0, rotation: 0};
     this.winnerModal = {winnerText: 'Winner: ', winner: ''};
@@ -89,7 +89,10 @@ export class AppComponent implements AfterViewInit {
     document.body.style.backgroundColor = this.settingInputs.bgColor; // Green Screen Color
     this.canvas = document.getElementById('cnvs') as HTMLCanvasElement; // Gets the Canvas Element
     this.ctx = this.canvas.getContext('2d'); // Context is 2d for the canvas
-    this.changeOrientation();
+    this.settingInputs.wheelSize = this.canvas.height;
+    console.log(this.canvas.height, window.innerWidth);
+
+    this.setWheelSize();
     this.refreshWheel(); // Calls the function Refresh Wheel
     const sliceColorPicker = document.getElementById('sliceColor');
     sliceColorPicker.addEventListener('change', () => this.addColor());
@@ -115,11 +118,10 @@ export class AppComponent implements AfterViewInit {
     const sBColorPicker = document.getElementById('sBColor');
     sBColorPicker.addEventListener('change', () => this.setPageColors());
 
-    const wheelSize = document.getElementById('wheelSize');
-    wheelSize.addEventListener('change', () => this.setWheelSize());
 
     // const dialSize = document.getElementById('dialSize');
     // dialSize.addEventListener('change', () => this.setDialSize());
+    window.onresize = (e) => this.setWheelSize();
   }
 
   // Adds Color
@@ -255,29 +257,74 @@ export class AppComponent implements AfterViewInit {
     let dial = document.getElementById('dial').style; // Gets the Dial
     let dialImg = document.getElementById('dial').getElementsByTagName('img')[0].style; // Gets the Dial
     if (this.wheelRotation.dialLocation === 0) { // Sets the dial location for the first position 000 00X 000
-      dial.top = this.settingInputs.wheelSize / 2 + this.settingInputs.dialSize * 3 / 4 + 'px';
+      dial.top = 8 + 64 + this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 2 + 'px';
       dial.marginLeft = (this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 4) + 'px';
     } else if (this.wheelRotation.dialLocation === 45) { // Sets the dial location for the second position 000 000 00X
-      dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + 16 + 'px';
-      dial.marginLeft = ((this.settingInputs.wheelSize / 2) - this.settingInputs.dialSize * 2) + 'px';
+      if (window.innerWidth < 767) {
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + 64 + 8 + 'px';
+        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize/2 + 8 + 'px';
+      } else if (window.innerWidth < 1024) {
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize/2 + 64 + 8 + 'px';
+        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8 + 'px';
+      } else if (window.innerWidth < 1280) {
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize/2 + 64 + 8 + 'px';
+        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8 + 'px';
+      } else {
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + 64 + 8 + 'px';
+        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize*1.5 + 8 + 'px';
+      }
     } else if (this.wheelRotation.dialLocation === 90) { // Sets the dial location for the third position 000 000 0X0
       dial.top = this.settingInputs.wheelSize + this.settingInputs.dialSize + 'px';
       dial.marginLeft = this.settingInputs.dialSize / 2 + 'px';
     } else if (this.wheelRotation.dialLocation === 135) { // Sets the dial location for the fourth position 000 000 X00
-      dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + 16 + 'px';
-      dial.marginLeft = '-' + ((this.settingInputs.wheelSize / 2) - this.settingInputs.dialSize) + 'px';
+
+      if (window.innerWidth < 767) {
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize / 2 + 64 + 8 + 'px';
+        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) - this.settingInputs.dialSize / 2 + 11) + 'px';
+      } else if (window.innerWidth < 1024) {
+        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 - 8) + 'px';
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + 64 + 8 + 'px';
+      } else if (window.innerWidth < 1280) {
+        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8) + 'px';
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize * 1.5 + 64 + 8 + 'px';
+      } else {
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize * 1.5 + 64 + 8 + 'px';
+        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8) + 'px';
+      }
     } else if (this.wheelRotation.dialLocation === 180) { // Sets the dial location for the fifth position 000 X00 000
-      dial.top = this.settingInputs.wheelSize / 2 + this.settingInputs.dialSize * 7 / 4 + 'px';
+      dial.top = 64 + 8 + this.settingInputs.wheelSize / 2 + this.settingInputs.dialSize / 2 + 'px';
       dial.marginLeft = -1 * (this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 4) + 'px';
     } else if (this.wheelRotation.dialLocation === 225) { // Sets the dial location for the sixth position X00 000 000
-      dial.top = (this.settingInputs.wheelSize) * 1 / 4 - this.settingInputs.dialSize + 16 + 'px';
-      dial.marginLeft = '-' + ((this.settingInputs.wheelSize / 2) - this.settingInputs.dialSize) + 'px';
+      if (window.innerWidth < 767) {
+        dial.top = 64 + 8 + this.settingInputs.wheelSize / 4 + 'px';
+        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8) + 'px';
+      } else if (window.innerWidth < 1024) {
+        dial.top = 64 + 8 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize / 2 + 'px';
+        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8) + 'px';
+      } else if (window.innerWidth < 1280) {
+        dial.top = 64 + 8 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize / 2 + 'px';
+        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8) + 'px';
+      } else {
+        dial.top = 64 + 8 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + 'px';
+        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + this.settingInputs.dialSize / 2 + 8) + 'px';
+      }
     } else if (this.wheelRotation.dialLocation === 270) { // Sets the dial location for the seventh position 0X0 000 000
-      dial.top = this.settingInputs.dialSize + this.settingInputs.dialSize / 2 + 'px';
+      dial.top = 64 - 8 + this.settingInputs.dialSize / 2 + 'px';
       dial.marginLeft = -1 * this.settingInputs.dialSize / 2 + 'px';
     } else if (this.wheelRotation.dialLocation === 315) { // Sets the dial location for the eigth position 00X 000 000
-      dial.top = (this.settingInputs.wheelSize) / (Math.PI * 2) + this.settingInputs.dialSize + 'px';
-      dial.marginLeft = (this.settingInputs.wheelSize / Math.PI) - 5 + 'px';
+      dial.top = 64 + 8 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + 'px';
+      if (window.innerWidth < 767) {
+        dial.marginLeft = (this.settingInputs.wheelSize / 4) + 'px';
+      } else if (window.innerWidth < 1024) {
+        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 4 + 'px';
+      } else if (window.innerWidth < 1280) {
+        dial.top = 64 - 4 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + 'px';
+        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 'px';
+      } else {
+        dial.top = 64 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize * 1.5 + 'px';
+        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 'px';
+      }
+
     }
     dial.transform = 'rotate(' + this.wheelRotation.dialLocation + 'deg)'; // Rotates the dial to whatever is selected as the location
 
@@ -349,7 +396,7 @@ export class AppComponent implements AfterViewInit {
     context.moveTo(cenX, cenY); // Moves to the center
     context.arc(cenX, cenY, rad, this.contestants[i].sAngle, this.contestants[i].eAngle, false); // Makes an arc
     context.closePath(); // Ends the path
-    context.lineWidth = 5
+    context.lineWidth = 5;
     if (!!(this.settingInputs.customImage)) {
       context.strokeStyle = 'gray';
       context.stroke();
@@ -390,10 +437,12 @@ export class AppComponent implements AfterViewInit {
     // this.colors = JSON.parse(localStorage.getItem('colors'));
     this.refreshWheel();
   }
-  resetBgColor(){
-    this.settingInputs.bgColor = 'rgb(0,177,64)';
+
+  resetBgColor() {
+    this.settingInputs.bgColor = '#00b140';
     document.body.style.backgroundColor = this.settingInputs.bgColor;
   }
+
   // Resets the Colors
   resetColors() {
     let colorsUsed = this.colorSelection(this.colorSelector);
@@ -502,7 +551,7 @@ export class AppComponent implements AfterViewInit {
     document.getElementById('winnerModal').getElementsByTagName('div')[0].style.backgroundColor = this.settingInputs.mColor; // Sets the Winner Modal Background
     document.getElementById('winnerModal').style.color = this.settingInputs.mFColor; // Sets the Settings Table
     console.log(document.getElementsByClassName('tabHeader')); // Sets the Settings Table
-    for (let i = 0; i <  document.getElementsByClassName('tabHeader').length; i++) {
+    for (let i = 0; i < document.getElementsByClassName('tabHeader').length; i++) {
       document.getElementsByClassName('tabHeader').item(0).getElementsByTagName('div')[i].style.borderBottom = this.colorLum(this.settingInputs.acColor, 0.2) + '1px dashed';
     }
     document.getElementById('tabButtons').style.backgroundColor = this.settingInputs.acColor; // Sets the tab buttons
@@ -517,9 +566,19 @@ export class AppComponent implements AfterViewInit {
   }
 
   setWheelSize() {
-    this.canvas.width = this.settingInputs.wheelSize;
-    this.canvas.style.marginLeft = -1 * this.settingInputs.wheelSize / 2 + 'px';
-    this.canvas.height = this.settingInputs.wheelSize;
+    if (window.innerWidth <= 320) {
+      this.settingInputs.wheelSize = 220;
+    } else if (320 < window.innerWidth && window.innerWidth <= 480) {
+      this.settingInputs.wheelSize = 280;
+    } else if (480 < window.innerWidth && window.innerWidth <= 767) {
+      this.settingInputs.wheelSize = 360;
+    } else if (768 < window.innerWidth && window.innerWidth <= 1024) {
+      this.settingInputs.wheelSize = 480;
+    } else if (1024 < window.innerWidth && window.innerWidth <= 1280) {
+      this.settingInputs.wheelSize = 640;
+    } else if (window.innerWidth > 1280) {
+      this.settingInputs.wheelSize = 720;
+    }
     this.refreshWheel();
     this.changeOrientation();
   }
