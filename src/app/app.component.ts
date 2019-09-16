@@ -256,21 +256,22 @@ export class AppComponent implements AfterViewInit {
   changeOrientation() {
     let dial = document.getElementById('dial').style; // Gets the Dial
     let dialImg = document.getElementById('dial').getElementsByTagName('img')[0].style; // Gets the Dial
+    let topMargin = 64 + 8 + 101;
     if (this.wheelRotation.dialLocation === 0) { // Sets the dial location for the first position 000 00X 000
-      dial.top = 8 + 64 + this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 2 + 'px';
+      dial.top = topMargin + this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 2 + 'px';
       dial.marginLeft = (this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 4) + 'px';
     } else if (this.wheelRotation.dialLocation === 45) { // Sets the dial location for the second position 000 000 00X
       if (window.innerWidth < 767) {
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + 64 + 8 + 'px';
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + topMargin + 'px';
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize/2 + 8 + 'px';
       } else if (window.innerWidth < 1024) {
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize/2 + 64 + 8 + 'px';
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize/2 + topMargin + 'px';
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8 + 'px';
       } else if (window.innerWidth < 1280) {
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize/2 + 64 + 8 + 'px';
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize/2 + topMargin + 'px';
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8 + 'px';
       } else {
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + 64 + 8 + 'px';
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + topMargin + 'px';
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize*1.5 + 8 + 'px';
       }
     } else if (this.wheelRotation.dialLocation === 90) { // Sets the dial location for the third position 000 000 0X0
@@ -279,49 +280,49 @@ export class AppComponent implements AfterViewInit {
     } else if (this.wheelRotation.dialLocation === 135) { // Sets the dial location for the fourth position 000 000 X00
 
       if (window.innerWidth < 767) {
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize / 2 + 64 + 8 + 'px';
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize / 2 + topMargin + 'px';
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) - this.settingInputs.dialSize / 2 + 11) + 'px';
       } else if (window.innerWidth < 1024) {
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 - 8) + 'px';
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + 64 + 8 + 'px';
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + topMargin + 'px';
       } else if (window.innerWidth < 1280) {
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8) + 'px';
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize * 1.5 + 64 + 8 + 'px';
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize * 1.5 + topMargin + 'px';
       } else {
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize * 1.5 + 64 + 8 + 'px';
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize * 1.5 + topMargin + 'px';
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8) + 'px';
       }
     } else if (this.wheelRotation.dialLocation === 180) { // Sets the dial location for the fifth position 000 X00 000
-      dial.top = 64 + 8 + this.settingInputs.wheelSize / 2 + this.settingInputs.dialSize / 2 + 'px';
+      dial.top = this.settingInputs.wheelSize / 2 + this.settingInputs.dialSize / 2 + topMargin +  'px';
       dial.marginLeft = -1 * (this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 4) + 'px';
     } else if (this.wheelRotation.dialLocation === 225) { // Sets the dial location for the sixth position X00 000 000
       if (window.innerWidth < 767) {
-        dial.top = 64 + 8 + this.settingInputs.wheelSize / 4 + 'px';
+        dial.top = topMargin + this.settingInputs.wheelSize / 4 + 'px';
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8) + 'px';
       } else if (window.innerWidth < 1024) {
-        dial.top = 64 + 8 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize / 2 + 'px';
+        dial.top = this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize / 2 + topMargin + 'px';
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8) + 'px';
       } else if (window.innerWidth < 1280) {
-        dial.top = 64 + 8 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize / 2 + 'px';
+        dial.top =  this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize / 2 + topMargin + 'px';
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8) + 'px';
       } else {
-        dial.top = 64 + 8 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + 'px';
+        dial.top = this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + topMargin + 'px';
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + this.settingInputs.dialSize / 2 + 8) + 'px';
       }
     } else if (this.wheelRotation.dialLocation === 270) { // Sets the dial location for the seventh position 0X0 000 000
-      dial.top = 64 - 8 + this.settingInputs.dialSize / 2 + 'px';
+      dial.top =  -16 + this.settingInputs.dialSize / 2 + topMargin + 'px';
       dial.marginLeft = -1 * this.settingInputs.dialSize / 2 + 'px';
     } else if (this.wheelRotation.dialLocation === 315) { // Sets the dial location for the eigth position 00X 000 000
-      dial.top = 64 + 8 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + 'px';
+      dial.top =  this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + topMargin + 'px';
       if (window.innerWidth < 767) {
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + 'px';
       } else if (window.innerWidth < 1024) {
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 4 + 'px';
       } else if (window.innerWidth < 1280) {
-        dial.top = 64 - 4 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + 'px';
+        dial.top = -12 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + topMargin + 'px';
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 'px';
       } else {
-        dial.top = 64 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize * 1.5 + 'px';
+        dial.top = -8 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize * 1.5 + topMargin + 'px';
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 'px';
       }
 
