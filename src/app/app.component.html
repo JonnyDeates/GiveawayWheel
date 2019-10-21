@@ -1,5 +1,5 @@
 
-<div class="header">The Koi's Giveaway Wheel</div>
+<div class="header accentColor fontColor">The Koi's Giveaway Wheel</div>
 <div id="wheelWrapper">
   <canvas id="cnvs" height="720" width="720"></canvas>
   <div id="dial"><img src="/assets/dial/dial.png" [width]="settingInputs.dialSize" [height]="settingInputs.dialSize"></div>
@@ -7,16 +7,16 @@
 <div id="winnerModal" class="disabled" (click)="disableModal()">
   <div>{{winnerModal.winnerText}} {{winnerModal.winner}}</div>
 </div>
-<div id="spinbtn" (click)="spinWheel()">SPIN!</div>
-<div class="row center">
-  <div id="tabButtons" class="tabButtons">
+<div id="spinbtn" class="accentColor fontColor" (click)="spinWheel()">SPIN!</div>
+<div id='tabWrapper' class="row center">
+  <div id="tabButtons" class="tabButtons accentColor">
     <div *ngFor="let tab of tabs; let i = index" (click)="changeTab(tab, i)">{{tab}}</div>
   </div>
-  <div id="contestantsTab">
+  <div id="contestantsTab" class="accentColor fontColor">
     <span>Contestant: </span>
     <input class="text-input" type="text" (keyup.enter)="addContestant()" [(ngModel)]="contestant">
     <a class="add-btn" (click)="addContestant()">+</a>
-    <div id="contestantsTabTable" class="namesTabTable">
+    <div id="contestantsTabTable" class="namesTabTable accentTableColor">
       <h6>Contestants</h6>
       <div *ngFor="let contestant of contestants">
         <div class="name">{{contestant.name}}</div>
@@ -24,8 +24,7 @@
       </div>
     </div>
   </div>
-
-  <div id="colorsTab" class="disabled">
+  <div id="colorsTab" class="accentColor fontColor disabled">
     <span>Color</span>
     <input id="sliceColor" type="color" [(ngModel)]="color">
     <input class="text-input" type="DOMString" [(ngModel)]="color" (keyup.enter)="addColor();">
@@ -35,7 +34,7 @@
           (click)="selectPattern(pattern)">{{pattern}}
       </li>
     </ul>
-    <div id="colorsTabTable" class="colorsTabTable">
+    <div id="colorsTabTable" class="colorsTabTable accentTableColor fontColor">
       <h6>Colors</h6>
       <div *ngFor="let color of colors" [style.background-color]="color">
         <div>{{color}}</div>
@@ -43,12 +42,11 @@
       </div>
     </div>
   </div>
-  <div id="settingsTab" class="disabled">
+  <div id="settingsTab" class="accentColor fontColor disabled">
     <div class="tabHeader">Site Colors
       <div >Background: <input id="bgColor" type="color" [(ngModel)]="settingInputs.bgColor"> Chroma Key: <div class="template-color" [style.background-color]='"#00b140"' (click)="resetBgColor()"></div></div>
       <div>Accent: <input id="acColor" type="color" [(ngModel)]="settingInputs.acColor"></div>
       <div>Font: <input id="fontColor" type="color" [(ngModel)]="settingInputs.fontColor"></div>
-      <div>Spin Button: <input id="sBColor" type="color" [(ngModel)]="settingInputs.sBColor"></div>
     </div>
     <div class="tabHeader"> Wheel
       <div>Time: <input type="number" [(ngModel)]="settingInputs.spinTime">s</div>

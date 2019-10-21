@@ -1,5 +1,6 @@
 import {Component, OnInit, ViewChild, AfterViewInit} from '@angular/core';
 import {Router} from '@angular/router';
+import * as $ from 'jquery';
 
 @Component({
   selector: 'app-root',
@@ -94,35 +95,20 @@ export class AppComponent implements AfterViewInit {
 
     this.setWheelSize();
     this.refreshWheel(); // Calls the function Refresh Wheel
-    const sliceColorPicker = document.getElementById('sliceColor');
-    sliceColorPicker.addEventListener('change', () => this.addColor());
 
-    const acColorPicker = document.getElementById('acColor');
-    acColorPicker.addEventListener('change', () => this.setPageColors());
-
-    const bgColorPicker = document.getElementById('bgColor');
-    bgColorPicker.addEventListener('change', () => this.setPageColors());
-
-    const fontColorPicker = document.getElementById('fontColor');
-    fontColorPicker.addEventListener('change', () => this.setPageColors());
-
-    const mColorPicker = document.getElementById('mColor');
-    mColorPicker.addEventListener('change', () => this.setPageColors());
-
-    const mFColorPicker = document.getElementById('mFColor');
-    mFColorPicker.addEventListener('change', () => this.setPageColors());
-
-    const mWColorPicker = document.getElementById('mWColor');
-    mWColorPicker.addEventListener('change', () => this.setPageColors());
-
-    const sBColorPicker = document.getElementById('sBColor');
-    sBColorPicker.addEventListener('change', () => this.setPageColors());
-
+    $('#sliceColor').change(() => this.addColor());
+    $('#acColor').change(() => this.setAccentColor());
+    $('#bgColor').change(() => this.setPageColors());
+    $('#mColor').change(() => this.setPageColors());
+    $('#mFColor').change(() => this.setPageColors());
+    $('#mWColor').change(() => this.setPageColors());
+    $('#sBColor').change(() => this.setPageColors());
 
     // const dialSize = document.getElementById('dialSize');
     // dialSize.addEventListener('change', () => this.setDialSize());
     window.onresize = (e) => this.setWheelSize();
   }
+
 
   // Adds Color
   addColor() {
@@ -337,8 +323,8 @@ export class AppComponent implements AfterViewInit {
       tabAr = [document.getElementById('contestantsTab'), document.getElementById('colorsTab'), document.getElementById('settingsTab')];
 
     for (let x = 0; x < btnAr.children.length; x++) { // Resets the current active tab
-      btnAr.children.item(x).className = '';
-      tabAr.forEach((child) => child.className = 'disabled');
+      let y = $('#'+tabAr[x].id).css;
+      console.log('#'+tabAr[x].id, 'here baby', y);
     }
     btnAr.children.item(i).className = 'active';  // Sets the current Tab
     tabAr[tabAr.indexOf(tabAr.find((child) => child.id.toLowerCase().includes(tab.toLowerCase())))].className = ''; // Sets the current shown tab based on tab clicked.
@@ -535,19 +521,16 @@ export class AppComponent implements AfterViewInit {
     this.changeOrientation();
   }
 
+  setAccentColor() {
+    $('.accentColor').css('backgroundColor', this.settingInputs.acColor);
+    $('.accentTableColor').css('backgroundColor', this.colorLum(this.settingInputs.acColor, 0.2));
+
+  }
+  setFontColor() {
+    $('.fontColor').css('color', this.settingInputs.fontColor);
+  }
   setPageColors() {
     document.body.style.backgroundColor = this.settingInputs.bgColor; // Sets the Background Color
-    document.getElementById('contestantsTab').style.backgroundColor = this.settingInputs.acColor; // Set the Contestants Tab's Color
-    document.getElementById('contestantsTab').style.color = this.settingInputs.fontColor; // Set the Contestants Tab's Font Color
-    document.getElementById('contestantsTabTable').style.backgroundColor = this.colorLum(this.settingInputs.acColor, 0.2); // Sets the Contestants Tab Color to be 20% lighter
-    document.getElementById('contestantsTabTable').style.color = this.settingInputs.fontColor; // Sets the Contestants Tab Color to be 20% lighter
-    document.getElementById('colorsTab').style.backgroundColor = this.settingInputs.acColor; // Sets the colors tab's color
-    document.getElementById('colorsTab').style.color = this.settingInputs.fontColor; // Sets the colors tab's color
-    document.getElementById('colorsTabTable').style.backgroundColor = this.colorLum(this.settingInputs.acColor, 0.2); // Sets the Color's Tab's Table
-    document.getElementById('spinbtn').style.backgroundColor = this.settingInputs.sBColor; // Sets the Color of the Spin Button
-    document.getElementById('spinbtn').style.color = this.settingInputs.fontColor; // Sets the font color of the spin button
-    document.getElementById('settingsTab').style.backgroundColor = this.settingInputs.acColor; // Sets the Settings Table
-    document.getElementById('settingsTab').style.color = this.settingInputs.fontColor; // Sets the Settings Table
     document.getElementById('winnerModal').style.backgroundColor = this.settingInputs.mWColor + 'dd'; // Sets the Wrapper Winner Modal Background
     document.getElementById('winnerModal').getElementsByTagName('div')[0].style.backgroundColor = this.settingInputs.mColor; // Sets the Winner Modal Background
     document.getElementById('winnerModal').style.color = this.settingInputs.mFColor; // Sets the Settings Table
