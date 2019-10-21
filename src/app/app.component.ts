@@ -1,6 +1,9 @@
 import {Component, OnInit, ViewChild, AfterViewInit} from '@angular/core';
 import {Router} from '@angular/router';
 import * as $ from 'jquery';
+import * as cuid from "cuid";
+import {addContestant, Contestant, createContestants, removeContestant} from '../scripts/contestant';
+import {addColor, colorPatterns, colorSelection, createColors, removeColor, resetColors} from "../scripts/colors";
 
 @Component({
   selector: 'app-root',
@@ -14,9 +17,6 @@ export class AppComponent implements AfterViewInit {
   // Hex Tester
   hexTest = /[0-9A-Fa-f]{6}/g;
 
-  // Contestants
-  contestants: any;
-
   // Inputs
   color: string;
   colorSelector: any;
@@ -27,22 +27,21 @@ export class AppComponent implements AfterViewInit {
   tabs: any;
   settingInputs: any;
 
+  tables: {colors: string[], contestants: Contestant[]}
+
   // Wheel
   wheelRotation: any;
   winnerModal: any;
-  colors: any[];
   cssAnimation: any;
 
   // Constructor
   constructor(private router: Router) {
-    this.contestants = [];
-    this.colors = [];
     this.color = '#';
     this.colorSelector = 'Pattern Selection';
-    this.colorPatterns = ['abcd', 'ababcdcd', 'aabccd', 'abbcdd', 'abcb', 'abababcdcdcd', 'random', 'totalRandom'];
+    this.colorPatterns = colorPatterns;
     this.cssAnimation = document.createElement('style');
     this.dialOrientation = [['O', 'O', 'O'], ['O', 'R', 'X'], ['O', 'O', 'O']];
-
+    this.tables = {colors: [], contestants: []}
     this.settingInputs = {
       bgColor: '#00b140',
       sBColor: '#c3ecf8',
@@ -63,26 +62,12 @@ export class AppComponent implements AfterViewInit {
     this.tabs = ['Contestants', 'Colors', 'Settings'];
     this.wheelRotation = {dialLocation: 0, rate: 1.1, timer: 0, counter: 0, totalRot: 0, rotation: 0};
     this.winnerModal = {winnerText: 'Winner: ', winner: ''};
-    // sessionStorage.setItem('contestants', JSON.stringify([{name: 'Jonny', sAngle: 0, eAngle: 0, sColor: '#FFDAB9'},
-    //   {name: 'Tom', sAngle: 0, eAngle: 0, sColor: '#E6E6FA'},
-    //   {name: 'ter', sAngle: 0, eAngle: 0, sColor: '#E6E6FA'},
-    //   {name: 'Jeff', sAngle: 0, eAngle: 0, sColor: '#7744ff'}]))
-    // Checks the Local Storage to See if there is a registry saved from before if not then creates three default names
-    if (!(!!sessionStorage.getItem('contestants'))) {
-      this.contestants = [{name: 'Jonny', sAngle: 0, eAngle: 0, sColor: '#FFDAB9'},
-        {name: 'Tom', sAngle: 0, eAngle: 0, sColor: '#E6E6FA'},
-        {name: 'ter', sAngle: 0, eAngle: 0, sColor: '#E6E6FA'},
-        {name: 'Jeff', sAngle: 0, eAngle: 0, sColor: '#7744ff'}];
-    } else {
-      this.contestants = JSON.parse(sessionStorage.getItem('contestants'));
-    }
+    // Checks the Local Storage to See if there is a registry saved from before if not then creates Four default names
+    this.tables.contestants = createContestants(JSON.parse(sessionStorage.getItem('contestants')));
     // Checks the Local Storage to See if there is a registry saved from before if not then creates two default colors
-    if (!(!!sessionStorage.getItem('colors'))) {
-      this.colors = ['#FFDAB9', '#E6E6FA', '#7744ff'];
-    } else {
-      this.colors = JSON.parse(sessionStorage.getItem('colors'));
-    }
-    this.resetColors();
+    this.tables.colors = createColors(JSON.parse(sessionStorage.getItem('colors')));
+    resetColors(this.tables.contestants, this.colorSelector);
+
     this.cssAnimation.type = 'text/css';
   }
 
@@ -91,12 +76,11 @@ export class AppComponent implements AfterViewInit {
     this.canvas = document.getElementById('cnvs') as HTMLCanvasElement; // Gets the Canvas Element
     this.ctx = this.canvas.getContext('2d'); // Context is 2d for the canvas
     this.settingInputs.wheelSize = this.canvas.height;
-    console.log(this.canvas.height, window.innerWidth);
 
     this.setWheelSize();
     this.refreshWheel(); // Calls the function Refresh Wheel
 
-    $('#sliceColor').change(() => this.addColor());
+    $('#sliceColor').change(() => this.addWheelColor());
     $('#acColor').change(() => this.setAccentColor());
     $('#bgColor').change(() => this.setPageColors());
     $('#mColor').change(() => this.setPageColors());
@@ -111,35 +95,22 @@ export class AppComponent implements AfterViewInit {
 
 
   // Adds Color
-  addColor() {
-    if (this.color.trim() === '' || this.testForHex()) {
-      alert('Could not add Color, lacking information, needs to be in hex format');
-    } else {
-      this.colors.push(this.color);
+  addWheelColor() {
+    addColor(this.color, () => {
       this.color = '';
       this.refreshWheel();
-    }
-    sessionStorage.setItem('colors', JSON.stringify(this.colors));
-    // this.colors = JSON.parse(localStorage.getItem('colors'));
+    });
   }
 
   // Adds Contestant
-  addContestant() {
-    if (this.contestant.trim() === '') {
-      alert('Could not add Contestant, lacking information');
-    } else {
-      this.contestants.push({name: this.contestant, sAngle: 0, eAngle: 0, sColor: '#E6E6FA'});
-      this.contestant = '';
-    }
-    sessionStorage.setItem('contestants', JSON.stringify(this.contestants)); // Saves the contestants to the User's Session
-    // this.contestants = JSON.parse(sessionStorage.getItem('contestants'));
-    this.refreshWheel();
+  addPeople() {
+    addContestant(this.contestant, () => this.refreshWheel());
   }
 
   // Checks Contestant Winner
   checkWinner() {
     this.wheelRotation.rotation = this.wheelRotation.totalRot % 360; // Gets the mod of the total rotation and sets rotation to that
-    this.contestants.forEach((contestant) => { // Iterates through each Contestant
+    this.tables.contestants.forEach((contestant) => { // Iterates through each Contestant
       const leftBound = ((180 * contestant.sAngle) / (Math.PI) + this.wheelRotation.rotation) % 360, // This gets the left bound angle of the contestant converts to Degrees and then adds the current rotation to that, then gets the mod of that
         rightBound = ((180 * contestant.eAngle) / (Math.PI) + this.wheelRotation.rotation) % 360; // Does the same of the above bond angle except with the ending bound
       if (leftBound < rightBound) { // Checks to see if the left bound is greater than the right bound
@@ -173,71 +144,6 @@ export class AppComponent implements AfterViewInit {
     return rgb;
   }
 
-  // Selects the color based on what the current pattern selected is
-  colorSelection(selector) {
-    let colorsUsed = [];
-    if (this.colors.length > 1) { // Checks to make sure that there is more than 1 color
-      if (selector.includes('abababcdcdcd')) { // Creates the pattern shown by adding to itself the color mutliple times.
-        for (let i = 0; i < this.colors.length; i += 2) { // Moves 2 at a time so it loops through two colors from ab to cd
-          colorsUsed.push(this.colors[i]);
-          colorsUsed.push((!!(this.colors[i + 1]) ? this.colors[i + 1] : this.colors[i - 1]));
-          colorsUsed.push(this.colors[i]);
-          colorsUsed.push((!!(this.colors[i + 1]) ? this.colors[i + 1] : this.colors[i - 1]));
-          colorsUsed.push(this.colors[i]);
-          colorsUsed.push((!!(this.colors[i + 1]) ? this.colors[i + 1] : this.colors[i - 1]));
-        }
-      } else if (selector.includes('ababcdcd')) {
-        for (let i = 0; i < this.colors.length; i += 2) {
-          colorsUsed.push(this.colors[i]);
-          colorsUsed.push((!!(this.colors[i + 1]) ? this.colors[i + 1] : this.colors[i - 1]));
-          colorsUsed.push(this.colors[i]); // Resets colors to be one after another
-          colorsUsed.push((!!(this.colors[i + 1]) ? this.colors[i + 1] : this.colors[i - 1]));
-        }
-      } else if (selector.includes('abcd')) {
-        for (const color of this.colors) {
-          colorsUsed.push(color); // Resets colors to be one after another
-        }
-      } else if (selector.includes('aabccd')) {
-        for (let i = 0; i < this.colors.length; i += 2) {
-          colorsUsed.push(this.colors[i]);
-          colorsUsed.push(this.colors[i]);
-          colorsUsed.push((!!(this.colors[i + 1]) ? this.colors[i + 1] : this.colors[i - 1]));
-        }
-      } else if (selector.includes('abbcdd')) {
-        for (let i = 0; i < this.colors.length; i += 2) {
-          colorsUsed.push(this.colors[i]);
-          colorsUsed.push((!!(this.colors[i + 1]) ? this.colors[i + 1] : this.colors[i - 1]));
-          colorsUsed.push((!!(this.colors[i + 1]) ? this.colors[i + 1] : this.colors[i - 1]));
-        }
-      } else if (this.colors.length > 2 && selector.includes('abcb')) {
-        for (let i = 0; i < this.colors.length; i += 3) {
-          colorsUsed.push(this.colors[i]);
-          colorsUsed.push((!!(this.colors[i + 1]) ? this.colors[i + 1] : this.colors[i - 1]));
-          colorsUsed.push((!!(this.colors[i + 2]) ? this.colors[i + 2] : this.colors[i - 2]));
-          colorsUsed.push((!!(this.colors[i + 1]) ? this.colors[i + 1] : this.colors[i - 1]));
-        }
-      } else if (selector.includes('random')) {
-        let choice = this.colorPatterns[Math.floor(Math.random() * this.colorPatterns.length)]
-
-        for (let i = 0; i < this.colors.length; (selector.includes('abcb') ? i += 3 : (i += 2))) {
-          colorsUsed = this.colorSelection(choice);
-        }
-      } else if (selector.includes('totalRandom')) {
-        for (let i = 0; i < this.colors.length; i++) {
-          colorsUsed.push(this.colors[Math.floor(Math.random() * this.colors.length)]);
-        }
-      } else { // Sets to default color scheme if none are selected abcd...
-        for (const color of this.colors) {
-          colorsUsed.push(color);
-        }
-      }
-    } else { // Sets to default color scheme if the length of colors is less than what is needed to make a pattern.
-      for (const color of this.colors) {
-        colorsUsed.push(color);
-      }
-    }
-    return colorsUsed; // Returns an array of Colors to be used.
-  }
 
   changeOrientation() {
     let dial = document.getElementById('dial').style; // Gets the Dial
@@ -249,16 +155,16 @@ export class AppComponent implements AfterViewInit {
     } else if (this.wheelRotation.dialLocation === 45) { // Sets the dial location for the second position 000 000 00X
       if (window.innerWidth < 767) {
         dial.top = (this.settingInputs.wheelSize) * 3 / 4 + topMargin + 'px';
-        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize/2 + 8 + 'px';
+        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8 + 'px';
       } else if (window.innerWidth < 1024) {
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize/2 + topMargin + 'px';
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize / 2 + topMargin + 'px';
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8 + 'px';
       } else if (window.innerWidth < 1280) {
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize/2 + topMargin + 'px';
+        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize / 2 + topMargin + 'px';
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8 + 'px';
       } else {
         dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + topMargin + 'px';
-        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize*1.5 + 8 + 'px';
+        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize * 1.5 + 8 + 'px';
       }
     } else if (this.wheelRotation.dialLocation === 90) { // Sets the dial location for the third position 000 000 0X0
       dial.top = this.settingInputs.wheelSize + this.settingInputs.dialSize + 'px';
@@ -279,7 +185,7 @@ export class AppComponent implements AfterViewInit {
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8) + 'px';
       }
     } else if (this.wheelRotation.dialLocation === 180) { // Sets the dial location for the fifth position 000 X00 000
-      dial.top = this.settingInputs.wheelSize / 2 + this.settingInputs.dialSize / 2 + topMargin +  'px';
+      dial.top = this.settingInputs.wheelSize / 2 + this.settingInputs.dialSize / 2 + topMargin + 'px';
       dial.marginLeft = -1 * (this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 4) + 'px';
     } else if (this.wheelRotation.dialLocation === 225) { // Sets the dial location for the sixth position X00 000 000
       if (window.innerWidth < 767) {
@@ -289,17 +195,17 @@ export class AppComponent implements AfterViewInit {
         dial.top = this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize / 2 + topMargin + 'px';
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8) + 'px';
       } else if (window.innerWidth < 1280) {
-        dial.top =  this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize / 2 + topMargin + 'px';
+        dial.top = this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize / 2 + topMargin + 'px';
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8) + 'px';
       } else {
         dial.top = this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + topMargin + 'px';
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + this.settingInputs.dialSize / 2 + 8) + 'px';
       }
     } else if (this.wheelRotation.dialLocation === 270) { // Sets the dial location for the seventh position 0X0 000 000
-      dial.top =  -16 + this.settingInputs.dialSize / 2 + topMargin + 'px';
+      dial.top = -16 + this.settingInputs.dialSize / 2 + topMargin + 'px';
       dial.marginLeft = -1 * this.settingInputs.dialSize / 2 + 'px';
     } else if (this.wheelRotation.dialLocation === 315) { // Sets the dial location for the eigth position 00X 000 000
-      dial.top =  this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + topMargin + 'px';
+      dial.top = this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + topMargin + 'px';
       if (window.innerWidth < 767) {
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + 'px';
       } else if (window.innerWidth < 1024) {
@@ -323,8 +229,7 @@ export class AppComponent implements AfterViewInit {
       tabAr = [document.getElementById('contestantsTab'), document.getElementById('colorsTab'), document.getElementById('settingsTab')];
 
     for (let x = 0; x < btnAr.children.length; x++) { // Resets the current active tab
-      let y = $('#'+tabAr[x].id).css;
-      console.log('#'+tabAr[x].id, 'here baby', y);
+      let y = $('#' + tabAr[x].id).css;
     }
     btnAr.children.item(i).className = 'active';  // Sets the current Tab
     tabAr[tabAr.indexOf(tabAr.find((child) => child.id.toLowerCase().includes(tab.toLowerCase())))].className = ''; // Sets the current shown tab based on tab clicked.
@@ -353,10 +258,10 @@ export class AppComponent implements AfterViewInit {
   }
 
   // Draws the Names onto The segments of the Wheel
-  drawSegmentLabel(canvas, context, i, cenX, cenY) {
+  drawSegmentLabel(canvas, context, contestant, i, cenX, cenY) {
     context.save(); // Saves the context
     context.translate(cenX, cenY); // Moves context to the center of the circle
-    context.rotate(this.contestants[i].sAngle); // Rotates the context to the angle at which the contestants angle starts
+    context.rotate(contestant.sAngle); // Rotates the context to the angle at which the contestants angle starts
     const dx = Math.floor(canvas.width * 0.5) - 10; // Starts the
     const dy = Math.floor(canvas.height * 0.05) - 10; //
 
@@ -364,87 +269,65 @@ export class AppComponent implements AfterViewInit {
     const fontSize = Math.floor(canvas.height / 30); // Determines that size of the font  ***** Will be changed
     context.font = fontSize + 'pt Helvetica'; // Picks the font and size of the segment label
 
-    context.fillText(this.contestants[i].name, dx, dy);
+    context.fillText(contestant.name, dx, dy);
 
     context.restore();
   }
 
   // Draws each individual segment of the Wheel
-  drawSegment(canvas, context, angleSpacing, i) {
+  drawSegment(canvas, context, angleSpacing, contestant, i) {
     context.save(); // Saves the context of the canvas
     const cenX = Math.floor(canvas.width / 2), // Finds the center of the canvas' width
       cenY = Math.floor(canvas.height / 2), // Finds the center of the canvas' height
       rad = Math.floor(canvas.width / 2), // Finds the radius of the circle, using the canvas width
       arcSize = this.degToRad(angleSpacing); // Turns the degrees to Radians of the angle spacing to get the size of the arc on the circle
-    this.contestants[i].sAngle = this.degToRad(angleSpacing * i), // Gives the point at which the arc will be drawn in Radians
-      this.contestants[i].eAngle = this.contestants[i].sAngle + arcSize; // Finds the end point at which the slice can be drawn
+    contestant.sAngle = this.degToRad(angleSpacing * i), // Gives the point at which the arc will be drawn in Radians
+      contestant.eAngle = contestant.sAngle + arcSize; // Finds the end point at which the slice can be drawn
 
     context.beginPath(); // Starts the path
     context.moveTo(cenX, cenY); // Moves to the center
-    context.arc(cenX, cenY, rad, this.contestants[i].sAngle, this.contestants[i].eAngle, false); // Makes an arc
+    context.arc(cenX, cenY, rad, contestant.sAngle, contestant.eAngle, false); // Makes an arc
     context.closePath(); // Ends the path
     context.lineWidth = 5;
     if (!!(this.settingInputs.customImage)) {
       context.strokeStyle = 'gray';
       context.stroke();
     } else {
-      context.fillStyle = this.contestants[i].sColor; // Finds the color of the slice
+      context.fillStyle = contestant.sColor; // Finds the color of the slice
       context.fill(); // Fills the color
     }
     context.restore(); // This method restores the most recently saved canvas state by popping the top entry in the drawing state stack
 
-    this.drawSegmentLabel(canvas, context, i, cenX, cenY); // Calls the function draw Segment Label,
+    this.drawSegmentLabel(canvas, context, contestant, i, cenX, cenY); // Calls the function draw Segment Label,
   }
 
   // Refreshes the Wheel
   refreshWheel() {
-    const angleSpacing = 360 / this.contestants.length; // Creates the variable angleSpacing which represents the amount angle that each contestant will take up on the circle
-    this.resetColors(); // Calls the function reset Colors
+    const angleSpacing = 360 / this.tables.contestants.length; // Creates the variable angleSpacing which represents the amount angle that each contestant will take up on the circle
+    resetColors(this.tables.contestants, this.colorSelector); // Calls the function reset Colors
     this.setPageColors();
-    for (let i = 0; i < this.contestants.length; i++) {
-      this.drawSegment(this.canvas, this.ctx, angleSpacing, i);
+    for (let [i, contestant] of this.tables.contestants.entries()) {
+      this.drawSegment(this.canvas, this.ctx, angleSpacing, contestant ,i);
     }
   }
 
   // Removes the Selected Contestant
-  removeSelectedContestant(name) {
-    const removee = this.contestants.find((contestant) => contestant.name === name); // Finds the Removee
-    this.contestants.splice(this.contestants.indexOf(removee), 1); // Removes the contestant from the list of contestants
-    sessionStorage.setItem('contestants', JSON.stringify(this.contestants)); // Saves the Contestants to the User's Session
-    // this.contestants = JSON.parse(sessionStorage.getItem('contestants'));
-    this.refreshWheel();
+  removeSelectedContestant(id) {
+    removeContestant(id, ()=> this.refreshWheel());
   }
 
 
   // Removes the Selected Color
-  removeSelectedColor(name) {
-    this.colors.splice(this.colors.indexOf(name), 1);
-    this.resetColors();
-    sessionStorage.setItem('colors', JSON.stringify(this.colors));
-    // this.colors = JSON.parse(localStorage.getItem('colors'));
-    this.refreshWheel();
+  removeSelectedColor(Color: string) {
+    removeColor(Color, ()=> {
+      resetColors(this.tables.contestants, this.colorSelector);
+      this.refreshWheel();
+    });
   }
 
   resetBgColor() {
     this.settingInputs.bgColor = '#00b140';
     document.body.style.backgroundColor = this.settingInputs.bgColor;
-  }
-
-  // Resets the Colors
-  resetColors() {
-    let colorsUsed = this.colorSelection(this.colorSelector);
-
-    this.contestants.forEach((contestant) => {
-      if (!!(contestant.cColor)) { // Checks to see if the contestant has their own Color Field
-        contestant.sColor = contestant.cColor; // Sets it to that Color Field
-      } else {
-        if (colorsUsed.length === 0) { // Checks to see if the array is empty
-          colorsUsed = this.colorSelection(this.colorSelector); // Resets the Array
-        }
-        contestant.sColor = colorsUsed.splice(0, 1); // Removes 1 color at a time from colorsUsed and sets it to the contestants Slice Color
-      }
-
-    });
   }
 
   // Rotation of the Wheel
@@ -526,15 +409,17 @@ export class AppComponent implements AfterViewInit {
     $('.accentTableColor').css('backgroundColor', this.colorLum(this.settingInputs.acColor, 0.2));
 
   }
+
   setFontColor() {
     $('.fontColor').css('color', this.settingInputs.fontColor);
   }
+
   setPageColors() {
     document.body.style.backgroundColor = this.settingInputs.bgColor; // Sets the Background Color
     document.getElementById('winnerModal').style.backgroundColor = this.settingInputs.mWColor + 'dd'; // Sets the Wrapper Winner Modal Background
     document.getElementById('winnerModal').getElementsByTagName('div')[0].style.backgroundColor = this.settingInputs.mColor; // Sets the Winner Modal Background
     document.getElementById('winnerModal').style.color = this.settingInputs.mFColor; // Sets the Settings Table
-    console.log(document.getElementsByClassName('tabHeader')); // Sets the Settings Table
+    // Sets the Settings Table
     for (let i = 0; i < document.getElementsByClassName('tabHeader').length; i++) {
       document.getElementsByClassName('tabHeader').item(0).getElementsByTagName('div')[i].style.borderBottom = this.colorLum(this.settingInputs.acColor, 0.2) + '1px dashed';
     }
@@ -575,16 +460,5 @@ export class AppComponent implements AfterViewInit {
     document.getElementById('spinbtn').classList.add('disabled'); // Adds the field of disabled to the Spin Button
     this.wheelRotation.timer = (100 * this.settingInputs.spinTime); // The total timer, each 10 is a second, each digit increase is a 10 degree turn. 36 = 3.6 seconds and a complete 360 degree rotation if the rate is at 1.
     const intervalId = setInterval(() => this.rotateWheel(intervalId, this.wheelRotation.timer), 1);
-  }
-
-  // Testing the Color value to see if it is in the Hex format
-  testForHex() {
-    if (this.hexTest.test(this.color) || this.hexTest.test(this.color.substring(1))) {
-      if (this.color.charAt(0) !== '#') {
-        this.color = '#' + this.color;
-      }
-      return false;
-    }
-    return true;
   }
 }

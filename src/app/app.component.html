@@ -1,4 +1,3 @@
-
 <div class="header accentColor fontColor">The Koi's Giveaway Wheel</div>
 <div id="wheelWrapper">
   <canvas id="cnvs" height="720" width="720"></canvas>
@@ -14,21 +13,21 @@
   </div>
   <div id="contestantsTab" class="accentColor fontColor">
     <span>Contestant: </span>
-    <input class="text-input" type="text" (keyup.enter)="addContestant()" [(ngModel)]="contestant">
-    <a class="add-btn" (click)="addContestant()">+</a>
+    <input class="text-input" type="text" [(ngModel)]="contestant">
+    <a class="add-btn" (click)="addPeople()">+</a>
     <div id="contestantsTabTable" class="namesTabTable accentTableColor">
       <h6>Contestants</h6>
-      <div *ngFor="let contestant of contestants">
+      <div *ngFor="let contestant of tables.contestants">
         <div class="name">{{contestant.name}}</div>
-        <a (click)="removeSelectedContestant(contestant.name)">X</a>
+        <a (click)="removeSelectedContestant(contestant.id)">X</a>
       </div>
     </div>
   </div>
   <div id="colorsTab" class="accentColor fontColor disabled">
     <span>Color</span>
     <input id="sliceColor" type="color" [(ngModel)]="color">
-    <input class="text-input" type="DOMString" [(ngModel)]="color" (keyup.enter)="addColor();">
-    <a class="add-btn" (click)="addColor()">+</a>
+    <input class="text-input" type="DOMString" [(ngModel)]="color" (keyup.enter)="addWheelColor();">
+    <a class="add-btn" (click)="addWheelColor()">+</a>
     <ul class="colorselect-dropdown"> {{colorSelector}}
       <li *ngFor="let pattern of colorPatterns; let i = index;" [style.margin-top]="i*44+'px'"
           (click)="selectPattern(pattern)">{{pattern}}
@@ -36,7 +35,7 @@
     </ul>
     <div id="colorsTabTable" class="colorsTabTable accentTableColor fontColor">
       <h6>Colors</h6>
-      <div *ngFor="let color of colors" [style.background-color]="color">
+      <div *ngFor="let color of tables.colors" [style.background-color]="color">
         <div>{{color}}</div>
         <a (click)="removeSelectedColor(color)">X</a>
       </div>
