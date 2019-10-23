@@ -9,9 +9,9 @@
 <div id="spinbtn" class="accentColor fontColor" (click)="spinWheel()">SPIN!</div>
 <div id='tabWrapper' class="row center">
   <div id="tabButtons" class="tabButtons accentColor">
-    <div *ngFor="let tab of tabs; let i = index" (click)="changeTab(tab, i)">{{tab}}</div>
+    <div *ngFor="let tab of tabNames" [class.active]="tabs[tab]" (click)="changeTab(tab)">{{tab}}</div>
   </div>
-  <div id="contestantsTab" class="accentColor fontColor">
+  <div [class.disabled]="!tabs.Contestants" id="contestantsTab" class="accentColor fontColor">
     <span>Contestant: </span>
     <input class="text-input" type="text" [(ngModel)]="contestant">
     <a class="add-btn" (click)="addPeople()">+</a>
@@ -23,7 +23,7 @@
       </div>
     </div>
   </div>
-  <div id="colorsTab" class="accentColor fontColor disabled">
+  <div [class.disabled]="!tabs.Colors" id="colorsTab" class="accentColor fontColor">
     <span>Color</span>
     <input id="sliceColor" type="color" [(ngModel)]="color">
     <input class="text-input" type="DOMString" [(ngModel)]="color" (keyup.enter)="addWheelColor();">
@@ -41,7 +41,7 @@
       </div>
     </div>
   </div>
-  <div id="settingsTab" class="accentColor fontColor disabled">
+  <div [class.disabled]="!tabs.Setting" id="settingsTab" class="accentColor fontColor">
     <div class="tabHeader">Site Colors
       <div >Background: <input id="bgColor" type="color" [(ngModel)]="settingInputs.bgColor"> Chroma Key: <div class="template-color" [style.background-color]='"#00b140"' (click)="resetBgColor()"></div></div>
       <div>Accent: <input id="acColor" type="color" [(ngModel)]="settingInputs.acColor"></div>

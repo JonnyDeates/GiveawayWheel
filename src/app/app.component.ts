@@ -1,9 +1,12 @@
+///<reference path="../scripts/utlilities.ts"/>
 import {Component, OnInit, ViewChild, AfterViewInit} from '@angular/core';
 import {Router} from '@angular/router';
 import * as $ from 'jquery';
 import * as cuid from "cuid";
 import {addContestant, Contestant, createContestants, removeContestant} from '../scripts/contestant';
 import {addColor, colorPatterns, colorSelection, createColors, removeColor, resetColors} from "../scripts/colors";
+import {createSettings, dialOrientation, Settings} from "../scripts/settings";
+import {colorLum, degToRad} from "../scripts/utlilities";
 
 @Component({
   selector: 'app-root',
@@ -19,19 +22,20 @@ export class AppComponent implements AfterViewInit {
 
   // Inputs
   color: string;
-  colorSelector: any;
-  colorPatterns: any;
+  colorSelector: string;
+  colorPatterns: string[];
   contestant: string;
   dialOrientation: any;
   // Tabs
   tabs: any;
-  settingInputs: any;
+  tabNames: string[];
+  settingInputs: Settings;
 
-  tables: {colors: string[], contestants: Contestant[]}
+  tables: { colors: string[], contestants: Contestant[] }
 
   // Wheel
-  wheelRotation: any;
-  winnerModal: any;
+  wheelRotation: { dialLocation: number, rate: number, timer: number, counter: number, totalRot: number, rotation: number };
+  winnerModal: { winnerText: string, winner: string, winnerImg: string };
   cssAnimation: any;
 
   // Constructor
@@ -39,35 +43,22 @@ export class AppComponent implements AfterViewInit {
     this.color = '#';
     this.colorSelector = 'Pattern Selection';
     this.colorPatterns = colorPatterns;
-    this.cssAnimation = document.createElement('style');
-    this.dialOrientation = [['O', 'O', 'O'], ['O', 'R', 'X'], ['O', 'O', 'O']];
+    this.dialOrientation = dialOrientation;
     this.tables = {colors: [], contestants: []}
-    this.settingInputs = {
-      bgColor: '#00b140',
-      sBColor: '#c3ecf8',
-      acColor: '#ffffff',
-      mColor: '#ffffff',
-      mFColor: '#000000',
-      mWColor: '#000000dd',
-      fontColor: '#000000',
-      wheelSize: 720,
-      fontSize: 48,
-      spinTime: 10,
-      spinRate: 1.1,
-      dialSize: 50,
-      dialLocation: 0
-    };
-
-
-    this.tabs = ['Contestants', 'Colors', 'Settings'];
+    this.tabs = {Contestants: true, Colors: false, Setting: false};
+    this.tabNames = Object.keys(this.tabs)
     this.wheelRotation = {dialLocation: 0, rate: 1.1, timer: 0, counter: 0, totalRot: 0, rotation: 0};
-    this.winnerModal = {winnerText: 'Winner: ', winner: ''};
+    this.winnerModal = {winnerText: 'Winner: ', winner: '', winnerImg: ''};
+
+    // Checks the Local Storage to See if there is a registry saved from before if not then creates default settings
+    this.settingInputs = createSettings(JSON.parse(sessionStorage.getItem('settings')));
     // Checks the Local Storage to See if there is a registry saved from before if not then creates Four default names
     this.tables.contestants = createContestants(JSON.parse(sessionStorage.getItem('contestants')));
     // Checks the Local Storage to See if there is a registry saved from before if not then creates two default colors
     this.tables.colors = createColors(JSON.parse(sessionStorage.getItem('colors')));
     resetColors(this.tables.contestants, this.colorSelector);
 
+    this.cssAnimation = document.createElement('style');
     this.cssAnimation.type = 'text/css';
   }
 
@@ -126,130 +117,55 @@ export class AppComponent implements AfterViewInit {
 
   }
 
-  // Recieved from https://www.sitepoint.com/javascript-generate-lighter-darker-color/, allows for easy changing of hex format to be increase or decreased based on a percent value
-  colorLum(hex, lum) {
-    // validate hex string
-    hex = String(hex).replace(/[^0-9a-f]/gi, '');
-    if (hex.length < 6) {
-      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-    }
-    lum = lum || 0;
-    // convert to decimal and change luminosity
-    let rgb = '#', c, i;
-    for (i = 0; i < 3; i++) {
-      c = parseInt(hex.substr(i * 2, 2), 16);
-      c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
-      rgb += ('00' + c).substr(c.length);
-    }
-    return rgb;
-  }
-
 
   changeOrientation() {
     let dial = document.getElementById('dial').style; // Gets the Dial
     let dialImg = document.getElementById('dial').getElementsByTagName('img')[0].style; // Gets the Dial
     let topMargin = 64 + 8 + 101;
-    if (this.wheelRotation.dialLocation === 0) { // Sets the dial location for the first position 000 00X 000
-      dial.top = topMargin + this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 2 + 'px';
-      dial.marginLeft = (this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 4) + 'px';
-    } else if (this.wheelRotation.dialLocation === 45) { // Sets the dial location for the second position 000 000 00X
-      if (window.innerWidth < 767) {
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + topMargin + 'px';
-        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8 + 'px';
-      } else if (window.innerWidth < 1024) {
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize / 2 + topMargin + 'px';
-        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8 + 'px';
-      } else if (window.innerWidth < 1280) {
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize / 2 + topMargin + 'px';
-        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8 + 'px';
-      } else {
+    switch (this.wheelRotation.dialLocation) {
+      case 45: // Sets the dial location for the second position 000 000 00X
         dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + topMargin + 'px';
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize * 1.5 + 8 + 'px';
-      }
-    } else if (this.wheelRotation.dialLocation === 90) { // Sets the dial location for the third position 000 000 0X0
-      dial.top = this.settingInputs.wheelSize + this.settingInputs.dialSize + 'px';
-      dial.marginLeft = this.settingInputs.dialSize / 2 + 'px';
-    } else if (this.wheelRotation.dialLocation === 135) { // Sets the dial location for the fourth position 000 000 X00
-
-      if (window.innerWidth < 767) {
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize / 2 + topMargin + 'px';
-        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) - this.settingInputs.dialSize / 2 + 11) + 'px';
-      } else if (window.innerWidth < 1024) {
-        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 - 8) + 'px';
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + topMargin + 'px';
-      } else if (window.innerWidth < 1280) {
-        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8) + 'px';
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize * 1.5 + topMargin + 'px';
-      } else {
+        break;
+      case 90: // Sets the dial location for the third position 000 000 0X0
+        dial.top = this.settingInputs.wheelSize + this.settingInputs.dialSize + 'px';
+        dial.marginLeft = this.settingInputs.dialSize / 2 + 'px';
+        break;
+      case 135: // Sets the dial location for the fourth position 000 000 X00
         dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize * 1.5 + topMargin + 'px';
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8) + 'px';
-      }
-    } else if (this.wheelRotation.dialLocation === 180) { // Sets the dial location for the fifth position 000 X00 000
-      dial.top = this.settingInputs.wheelSize / 2 + this.settingInputs.dialSize / 2 + topMargin + 'px';
-      dial.marginLeft = -1 * (this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 4) + 'px';
-    } else if (this.wheelRotation.dialLocation === 225) { // Sets the dial location for the sixth position X00 000 000
-      if (window.innerWidth < 767) {
-        dial.top = topMargin + this.settingInputs.wheelSize / 4 + 'px';
-        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8) + 'px';
-      } else if (window.innerWidth < 1024) {
-        dial.top = this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize / 2 + topMargin + 'px';
-        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8) + 'px';
-      } else if (window.innerWidth < 1280) {
-        dial.top = this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize / 2 + topMargin + 'px';
-        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 8) + 'px';
-      } else {
+        break;
+      case 180: // Sets the dial location for the fifth position 000 X00 000
+        dial.top = this.settingInputs.wheelSize / 2 + this.settingInputs.dialSize / 2 + topMargin + 'px';
+        dial.marginLeft = -1 * (this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 4) + 'px';
+        break;
+      case 225: // Sets the dial location for the sixth position X00 000 000
         dial.top = this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + topMargin + 'px';
         dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + this.settingInputs.dialSize / 2 + 8) + 'px';
-      }
-    } else if (this.wheelRotation.dialLocation === 270) { // Sets the dial location for the seventh position 0X0 000 000
-      dial.top = -16 + this.settingInputs.dialSize / 2 + topMargin + 'px';
-      dial.marginLeft = -1 * this.settingInputs.dialSize / 2 + 'px';
-    } else if (this.wheelRotation.dialLocation === 315) { // Sets the dial location for the eigth position 00X 000 000
-      dial.top = this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + topMargin + 'px';
-      if (window.innerWidth < 767) {
-        dial.marginLeft = (this.settingInputs.wheelSize / 4) + 'px';
-      } else if (window.innerWidth < 1024) {
-        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 4 + 'px';
-      } else if (window.innerWidth < 1280) {
-        dial.top = -12 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + topMargin + 'px';
-        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 'px';
-      } else {
+        break;
+      case 270: // Sets the dial location for the seventh position 0X0 000 000
+        dial.top = -16 + this.settingInputs.dialSize / 2 + topMargin + 'px';
+        dial.marginLeft = -1 * this.settingInputs.dialSize / 2 + 'px';
+        break;
+      case 315: // Sets the dial location for the eigth position 00X 000 000
         dial.top = -8 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize * 1.5 + topMargin + 'px';
         dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 'px';
-      }
-
+        break;
+      default: // Sets the dial location for the first position 000 00X 000
+        dial.top = topMargin + this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 2 + 'px';
+        dial.marginLeft = (this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 4) + 'px';
+        break;
     }
-    dial.transform = 'rotate(' + this.wheelRotation.dialLocation + 'deg)'; // Rotates the dial to whatever is selected as the location
-
+    // Rotates the dial to whatever is selected as the location
+    dial.transform = 'rotate(' + this.wheelRotation.dialLocation + 'deg)';
   }
 
-  changeTab(tab, i) {
-    // Sets all variables to document Items
-    let btnAr = document.getElementsByClassName('tabButtons').item(0),
-      tabAr = [document.getElementById('contestantsTab'), document.getElementById('colorsTab'), document.getElementById('settingsTab')];
-
-    for (let x = 0; x < btnAr.children.length; x++) { // Resets the current active tab
-      let y = $('#' + tabAr[x].id).css;
+  changeTab(tab) {
+    this.tabs[tab] = true;
+    let x = this.tabNames.filter(name => name !== tab);
+    for (let y of x) {
+      this.tabs[y] = false;
     }
-    btnAr.children.item(i).className = 'active';  // Sets the current Tab
-    tabAr[tabAr.indexOf(tabAr.find((child) => child.id.toLowerCase().includes(tab.toLowerCase())))].className = ''; // Sets the current shown tab based on tab clicked.
-  }
-
-  // Converts from Degrees to Radians
-  degToRad(degrees) {
-    return (degrees * Math.PI) / 180;
-  }
-
-  // Get Random Value between two Values
-  getRBwVal(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  // Get Random Int between two Values
-  getRInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min; // Min is inclusive, Max is Exclusive
   }
 
   disableModal() {
@@ -280,8 +196,8 @@ export class AppComponent implements AfterViewInit {
     const cenX = Math.floor(canvas.width / 2), // Finds the center of the canvas' width
       cenY = Math.floor(canvas.height / 2), // Finds the center of the canvas' height
       rad = Math.floor(canvas.width / 2), // Finds the radius of the circle, using the canvas width
-      arcSize = this.degToRad(angleSpacing); // Turns the degrees to Radians of the angle spacing to get the size of the arc on the circle
-    contestant.sAngle = this.degToRad(angleSpacing * i), // Gives the point at which the arc will be drawn in Radians
+      arcSize = degToRad(angleSpacing); // Turns the degrees to Radians of the angle spacing to get the size of the arc on the circle
+    contestant.sAngle = degToRad(angleSpacing * i), // Gives the point at which the arc will be drawn in Radians
       contestant.eAngle = contestant.sAngle + arcSize; // Finds the end point at which the slice can be drawn
 
     context.beginPath(); // Starts the path
@@ -307,19 +223,19 @@ export class AppComponent implements AfterViewInit {
     resetColors(this.tables.contestants, this.colorSelector); // Calls the function reset Colors
     this.setPageColors();
     for (let [i, contestant] of this.tables.contestants.entries()) {
-      this.drawSegment(this.canvas, this.ctx, angleSpacing, contestant ,i);
+      this.drawSegment(this.canvas, this.ctx, angleSpacing, contestant, i);
     }
   }
 
   // Removes the Selected Contestant
   removeSelectedContestant(id) {
-    removeContestant(id, ()=> this.refreshWheel());
+    removeContestant(id, () => this.refreshWheel());
   }
 
 
   // Removes the Selected Color
   removeSelectedColor(Color: string) {
-    removeColor(Color, ()=> {
+    removeColor(Color, () => {
       resetColors(this.tables.contestants, this.colorSelector);
       this.refreshWheel();
     });
@@ -399,14 +315,14 @@ export class AppComponent implements AfterViewInit {
 
   setDialSize() {
     let dial = document.getElementById('dial').style;
-    dial.width = this.settingInputs.dialSize;
-    dial.height = this.settingInputs.dialSize;
+    dial.width = ''+this.settingInputs.dialSize;
+    dial.height = ''+this.settingInputs.dialSize;
     this.changeOrientation();
   }
 
   setAccentColor() {
     $('.accentColor').css('backgroundColor', this.settingInputs.acColor);
-    $('.accentTableColor').css('backgroundColor', this.colorLum(this.settingInputs.acColor, 0.2));
+    $('.accentTableColor').css('backgroundColor', colorLum(this.settingInputs.acColor, 0.2));
 
   }
 
@@ -421,7 +337,7 @@ export class AppComponent implements AfterViewInit {
     document.getElementById('winnerModal').style.color = this.settingInputs.mFColor; // Sets the Settings Table
     // Sets the Settings Table
     for (let i = 0; i < document.getElementsByClassName('tabHeader').length; i++) {
-      document.getElementsByClassName('tabHeader').item(0).getElementsByTagName('div')[i].style.borderBottom = this.colorLum(this.settingInputs.acColor, 0.2) + '1px dashed';
+      document.getElementsByClassName('tabHeader').item(0).getElementsByTagName('div')[i].style.borderBottom = colorLum(this.settingInputs.acColor, 0.2) + '1px dashed';
     }
     document.getElementById('tabButtons').style.backgroundColor = this.settingInputs.acColor; // Sets the tab buttons
     document.getElementById('tabButtons').style.color = this.settingInputs.fontColor; // Sets the tab buttons
@@ -430,7 +346,7 @@ export class AppComponent implements AfterViewInit {
       document.getElementsByClassName('namesTabTable').item(0).getElementsByTagName('div')[x].style.backgroundColor = this.settingInputs.acColor;
     }
     for (let x = 2; x < document.getElementsByClassName('namesTabTable').item(0).getElementsByTagName('div').length; x += 4) { // Sets the odd Rows of the Contestants table to be 10% darker.
-      document.getElementsByClassName('namesTabTable').item(0).getElementsByTagName('div')[x].style.backgroundColor = this.colorLum(this.settingInputs.acColor, -0.1);
+      document.getElementsByClassName('namesTabTable').item(0).getElementsByTagName('div')[x].style.backgroundColor = colorLum(this.settingInputs.acColor, -0.1);
     }
   }
 
@@ -456,7 +372,7 @@ export class AppComponent implements AfterViewInit {
   // Spin Function
   spinWheel() {
     this.wheelRotation.counter = 0;
-    this.wheelRotation.rate = parseFloat(JSON.parse(JSON.stringify(this.settingInputs.spinRate))) * 1.238756;
+    this.wheelRotation.rate = parseFloat(JSON.parse(JSON.stringify(this.settingInputs.spinRate))) * 1.61803398875;
     document.getElementById('spinbtn').classList.add('disabled'); // Adds the field of disabled to the Spin Button
     this.wheelRotation.timer = (100 * this.settingInputs.spinTime); // The total timer, each 10 is a second, each digit increase is a 10 degree turn. 36 = 3.6 seconds and a complete 360 degree rotation if the rate is at 1.
     const intervalId = setInterval(() => this.rotateWheel(intervalId, this.wheelRotation.timer), 1);
