@@ -63,7 +63,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    document.body.style.backgroundColor = this.settingInputs.bgColor; // Green Screen Color
+    document.body.style.backgroundColor = this.settingInputs.colors.background; // Green Screen Color
     this.canvas = document.getElementById('cnvs') as HTMLCanvasElement; // Gets the Canvas Element
     this.ctx = this.canvas.getContext('2d'); // Context is 2d for the canvas
     this.settingInputs.wheelSize = this.canvas.height;
@@ -242,8 +242,8 @@ export class AppComponent implements AfterViewInit {
   }
 
   resetBgColor() {
-    this.settingInputs.bgColor = '#00b140';
-    document.body.style.backgroundColor = this.settingInputs.bgColor;
+    this.settingInputs.colors.background = '#00b140';
+    document.body.style.backgroundColor = this.settingInputs.colors.background;
   }
 
   // Rotation of the Wheel
@@ -321,32 +321,32 @@ export class AppComponent implements AfterViewInit {
   }
 
   setAccentColor() {
-    $('.accentColor').css('backgroundColor', this.settingInputs.acColor);
-    $('.accentTableColor').css('backgroundColor', colorLum(this.settingInputs.acColor, 0.2));
+    $('.accentColor').css('backgroundColor', this.settingInputs.colors.accent);
+    $('.accentTableColor').css('backgroundColor', colorLum(this.settingInputs.colors.accent, 0.2));
 
   }
 
   setFontColor() {
-    $('.fontColor').css('color', this.settingInputs.fontColor);
+    $('.fontColor').css('color', this.settingInputs.colors.font);
   }
 
   setPageColors() {
-    document.body.style.backgroundColor = this.settingInputs.bgColor; // Sets the Background Color
-    document.getElementById('winnerModal').style.backgroundColor = this.settingInputs.mWColor + 'dd'; // Sets the Wrapper Winner Modal Background
-    document.getElementById('winnerModal').getElementsByTagName('div')[0].style.backgroundColor = this.settingInputs.mColor; // Sets the Winner Modal Background
-    document.getElementById('winnerModal').style.color = this.settingInputs.mFColor; // Sets the Settings Table
+    document.body.style.backgroundColor = this.settingInputs.colors.background; // Sets the Background Color
+    document.getElementById('winnerModal').style.backgroundColor = this.settingInputs.colors.modalBackground + 'dd'; // Sets the Wrapper Winner Modal Background
+    document.getElementById('winnerModal').getElementsByTagName('div')[0].style.backgroundColor = this.settingInputs.colors.modalBackground; // Sets the Winner Modal Background
+    document.getElementById('winnerModal').style.color = this.settingInputs.colors.modalFont; // Sets the Settings Table
     // Sets the Settings Table
     for (let i = 0; i < document.getElementsByClassName('tabHeader').length; i++) {
-      document.getElementsByClassName('tabHeader').item(0).getElementsByTagName('div')[i].style.borderBottom = colorLum(this.settingInputs.acColor, 0.2) + '1px dashed';
+      document.getElementsByClassName('tabHeader').item(0).getElementsByTagName('div')[i].style.borderBottom = colorLum(this.settingInputs.colors.accent, 0.2) + '1px dashed';
     }
-    document.getElementById('tabButtons').style.backgroundColor = this.settingInputs.acColor; // Sets the tab buttons
-    document.getElementById('tabButtons').style.color = this.settingInputs.fontColor; // Sets the tab buttons
+    document.getElementById('tabButtons').style.backgroundColor = this.settingInputs.colors.accent; // Sets the tab buttons
+    document.getElementById('tabButtons').style.color = this.settingInputs.colors.font; // Sets the tab buttons
 
     for (let x = 0; x < document.getElementsByClassName('namesTabTable').item(0).getElementsByTagName('div').length; x += 4) { // Sets the individual rows of the Contestants Table
-      document.getElementsByClassName('namesTabTable').item(0).getElementsByTagName('div')[x].style.backgroundColor = this.settingInputs.acColor;
+      document.getElementsByClassName('namesTabTable').item(0).getElementsByTagName('div')[x].style.backgroundColor = this.settingInputs.colors.accent;
     }
     for (let x = 2; x < document.getElementsByClassName('namesTabTable').item(0).getElementsByTagName('div').length; x += 4) { // Sets the odd Rows of the Contestants table to be 10% darker.
-      document.getElementsByClassName('namesTabTable').item(0).getElementsByTagName('div')[x].style.backgroundColor = colorLum(this.settingInputs.acColor, -0.1);
+      document.getElementsByClassName('namesTabTable').item(0).getElementsByTagName('div')[x].style.backgroundColor = colorLum(this.settingInputs.colors.accent, -0.1);
     }
   }
 

@@ -1,11 +1,13 @@
 export interface Settings {
-  bgColor: string,
-  sBColor: string,
-  acColor: string,
-  mColor: string,
-  mFColor: string,
-  mWColor: string,
-  fontColor: string,
+  colors: {
+    background: string,
+    accent: string,
+    spinBtn: string,
+    font: string,
+    modal: string,
+    modalBackground: string,
+    modalFont: string
+  },
   customImage: string,
   wheelSize: number,
   fontSize: number,
@@ -19,13 +21,15 @@ let settings: Settings;
 
 export function createSettings(arr?: Settings) {
   settings = (arr) ? arr : {
-    bgColor: '#00b140',
-    sBColor: '#c3ecf8',
-    acColor: '#ffffff',
-    mColor: '#ffffff',
-    mFColor: '#000000',
-    mWColor: '#000000dd',
-    fontColor: '#000000',
+    colors: {
+      background: '#00b140',
+      accent: '#ffffff',
+      spinBtn: '#ffffff',
+      font: '#000000',
+      modal: '#ffffff',
+      modalBackground: '#000000dd',
+      modalFont: '#000000'
+    },
     customImage: null,
     wheelSize: 720,
     dialSize: 50,

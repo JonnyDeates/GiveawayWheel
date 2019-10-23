@@ -43,9 +43,9 @@
   </div>
   <div [class.disabled]="!tabs.Setting" id="settingsTab" class="accentColor fontColor">
     <div class="tabHeader">Site Colors
-      <div >Background: <input id="bgColor" type="color" [(ngModel)]="settingInputs.bgColor"> Chroma Key: <div class="template-color" [style.background-color]='"#00b140"' (click)="resetBgColor()"></div></div>
-      <div>Accent: <input id="acColor" type="color" [(ngModel)]="settingInputs.acColor"></div>
-      <div>Font: <input id="fontColor" type="color" [(ngModel)]="settingInputs.fontColor"></div>
+      <div >Background: <input id="bgColor" type="color" [(ngModel)]="settingInputs.colors.background"> Chroma Key: <div class="template-color" [style.background-color]='"#00b140"' (click)="resetBgColor()"></div></div>
+      <div>Accent: <input id="acColor" type="color" [(ngModel)]="settingInputs.colors.accent"></div>
+      <div>Font: <input id="fontColor" type="color" [(ngModel)]="settingInputs.colors.font"></div>
     </div>
     <div class="tabHeader"> Wheel
       <div>Time: <input type="number" [(ngModel)]="settingInputs.spinTime">s</div>
@@ -58,9 +58,9 @@
       </div>
     </div>
     <div class="tabHeader">Winner Slide
-      <div>Background Wrapper Color:  <input id="mWColor" type="color" [(ngModel)]="settingInputs.mWColor"></div>
-      <div>Background Color:  <input id="mColor" type="color" [(ngModel)]="settingInputs.mColor"></div>
-      <div>Font: <input id="mFColor" type="color" [(ngModel)]="settingInputs.mFColor"></div>
+      <div>Background Wrapper Color:  <input id="mWColor" type="color" [(ngModel)]="settingInputs.colors.modalBackground"></div>
+      <div>Background Color:  <input id="mColor" type="color" [(ngModel)]="settingInputs.colors.modal"></div>
+      <div>Font: <input id="mFColor" type="color" [(ngModel)]="settingInputs.colors.modalFont"></div>
       <!--<div>Background:-->
       <!--<ul class="winnerbg-dropdown">-->
       <!--<li></li>-->
