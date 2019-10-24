@@ -3,10 +3,11 @@ import {Component, OnInit, ViewChild, AfterViewInit} from '@angular/core';
 import {Router} from '@angular/router';
 import * as $ from 'jquery';
 import * as cuid from "cuid";
-import {addContestant, Contestant, createContestants, removeContestant} from '../scripts/contestant';
+import {addContestant, clearContestants, Contestant, createContestants, removeContestant} from '../scripts/contestant';
 import {addColor, colorPatterns, colorSelection, createColors, removeColor, resetColors} from "../scripts/colors";
 import {createSettings, dialOrientation, Settings} from "../scripts/settings";
 import {colorLum, degToRad} from "../scripts/utlilities";
+import {changeDialOrientation} from "../scripts/wheel";
 
 @Component({
   selector: 'app-root',
@@ -31,6 +32,7 @@ export class AppComponent implements AfterViewInit {
   tabNames: string[];
   settingInputs: Settings;
 
+  modals: { winner: boolean, pasteList: { active: boolean, pasteContestants: string, overideContestants: boolean }, }
   tables: { colors: string[], contestants: Contestant[] }
 
   // Wheel
@@ -46,6 +48,7 @@ export class AppComponent implements AfterViewInit {
     this.dialOrientation = dialOrientation;
     this.tables = {colors: [], contestants: []}
     this.tabs = {Contestants: true, Colors: false, Setting: false};
+    this.modals = {winner: false, pasteList: {active: true, pasteContestants: '', overideContestants: false}};
     this.tabNames = Object.keys(this.tabs)
     this.wheelRotation = {dialLocation: 0, rate: 1.1, timer: 0, counter: 0, totalRot: 0, rotation: 0};
     this.winnerModal = {winnerText: 'Winner: ', winner: '', winnerImg: ''};
@@ -94,8 +97,34 @@ export class AppComponent implements AfterViewInit {
   }
 
   // Adds Contestant
-  addPeople() {
+  addPerson() {
     addContestant(this.contestant, () => this.refreshWheel());
+    this.contestant = '';
+  }
+
+  addPeople() {
+    let participantList = this.modals.pasteList.pasteContestants.split(/\n/);
+    console.log(participantList);
+
+    participantList = participantList.filter(str => str.trim() !== '');
+    console.log(participantList);
+    if (this.modals.pasteList.overideContestants && participantList.length > 0) {
+      clearContestants(() => {
+        for (let participant of participantList) {
+          addContestant(participant.trim(), () => {
+            this.refreshWheel();
+          });
+        }
+      })
+    } else {
+      for (let participant of participantList) {
+        addContestant(participant.trim(), () => {
+          this.refreshWheel();
+        });
+      }
+    }
+    this.modals.pasteList.pasteContestants = '';
+    this.togglePasteList();
   }
 
   // Checks Contestant Winner
@@ -114,14 +143,21 @@ export class AppComponent implements AfterViewInit {
         }
       }
     });
-
   }
 
+  toggleWinnerModal() {
+    this.modals.winner = !this.modals.winner;
+  }
+
+  togglePasteList() {
+    this.modals.pasteList.active = !this.modals.pasteList.active;
+  }
 
   changeOrientation() {
     let dial = document.getElementById('dial').style; // Gets the Dial
     let dialImg = document.getElementById('dial').getElementsByTagName('img')[0].style; // Gets the Dial
     let topMargin = 64 + 8 + 101;
+    //let dialChanges = changeDialOrientation(this.settingInputs.wheelSize, this.settingInputs.dialSize, topMargin, this.wheelRotation.dialLocation)
     switch (this.wheelRotation.dialLocation) {
       case 45: // Sets the dial location for the second position 000 000 00X
         dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + topMargin + 'px';
@@ -166,11 +202,6 @@ export class AppComponent implements AfterViewInit {
     for (let y of x) {
       this.tabs[y] = false;
     }
-  }
-
-  disableModal() {
-    document.getElementById('winnerModal').className = 'disabled';
-    document.getElementById('winnerModal').style.animation = '';
   }
 
   // Draws the Names onto The segments of the Wheel
@@ -315,8 +346,8 @@ export class AppComponent implements AfterViewInit {
 
   setDialSize() {
     let dial = document.getElementById('dial').style;
-    dial.width = ''+this.settingInputs.dialSize;
-    dial.height = ''+this.settingInputs.dialSize;
+    dial.width = '' + this.settingInputs.dialSize;
+    dial.height = '' + this.settingInputs.dialSize;
     this.changeOrientation();
   }
 

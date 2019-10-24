@@ -41,7 +41,6 @@
   background-color: white;
   max-width: 500px;
   left: 50%;
-  margin-top: 64px;
   position: relative;
   margin-left: -250px;
 }
@@ -55,9 +54,8 @@
   background-color: #ddeff0;
 
 }
-#contestantsTab > .namesTabTable > h6, #colorsTab > .colorsTabTable > h6 {
-font-size: x-large;
-  margin-bottom: 20px;
+#contestantsTab > h2, #colorsTab > h2 {
+  margin-top: 20px;
 
 }
 #contestantsTab > .namesTabTable > div > a, #colorsTab > .colorsTabTable > div > a {
@@ -120,6 +118,33 @@ font-size: x-large;
   position: absolute;
   background: url("/dial/dial.png");
 }
+#pasteList {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  text-align: center;
+  background: #111111dd;
+  z-index: 3;
+}
+#pasteList > .modalWrapper{
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+}
+#pasteList > .modal {
+  justify-content: center;
+  display: inline-block;
+  z-index: 4;
+  padding: 32px;
+  border-radius: 20px;
+  background-color: white;
+  position: relative;
+  width: 60vw;
+  top: 15vh;
+  font-size: large;
+}
+
 #settingsTab {
 }
 #settingsTab > .tabHeader {
@@ -215,6 +240,8 @@ font-size: x-large;
   padding: 12px 36px;
   color: white;
   background-color: #00000044;
+  border: 2px solid #00000022;
+  cursor: pointer;
   text-align: center;
   z-index: 2;
   display: inline;
@@ -223,8 +250,7 @@ font-size: x-large;
   right: 75px;
   line-height: 9px;
   top: 10px;
-  border: 2px solid #00000022;
-  cursor: pointer;
+
 }
 .btn {
   -webkit-border-radius: 100%;
@@ -283,6 +309,17 @@ font-size: x-large;
   cursor: pointer;
   z-index: 2;
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+}
+.paste-btn {
+  color: white;
+  background-color: #00000044;
+  border: 2px solid #00000022;
+  cursor: pointer;
+  border-radius: 16px;
+  padding: 8px 10px;
+  margin-top: 12px;
+  width: fit-content;
+  display: inline-block;
 }
 .tabButtons{
   position: absolute;

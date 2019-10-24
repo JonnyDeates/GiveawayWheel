@@ -1,9 +1,27 @@
 <div class="header accentColor fontColor">The Koi's Giveaway Wheel</div>
 <div id="wheelWrapper">
   <canvas id="cnvs" height="720" width="720"></canvas>
-  <div id="dial"><img src="/assets/dial/dial.png" [width]="settingInputs.dialSize" [height]="settingInputs.dialSize"></div>
+  <div id="dial"><img src="/assets/dial/dial.png" [width]="settingInputs.dialSize" [height]="settingInputs.dialSize">
+  </div>
 </div>
-<div id="winnerModal" class="disabled" (click)="disableModal()">
+<div id="pasteList" [class.disabled]="!modals.pasteList.active">
+  <div class="modalWrapper" (click)="togglePasteList()"></div>
+  <div class="modal">
+    <h1>Paste List</h1>
+    <p>Paste into the text box below with one contestant per line, or if you would like, and then click the "Add Contestants" button</p>
+    <textarea [(ngModel)]="modals.pasteList.pasteContestants"></textarea>
+    <div>
+      <input id="replaceContestants" type="checkbox" [(ngModel)]="modals.pasteList.overideContestants"/>
+      <label for="replaceContestants">Replace All Contestants (all current contestants will be removed and replaced by
+        the new list)</label>
+    </div>
+    <div>
+      <button (click)="togglePasteList();">Cancel</button>
+      <button (click)="addPeople()">Add Contestants</button>
+    </div>
+  </div>
+</div>
+<div id="winnerModal" [class.disabled]="!modals.winner" (click)="toggleWinnerModal()">
   <div>{{winnerModal.winnerText}} {{winnerModal.winner}}</div>
 </div>
 <div id="spinbtn" class="accentColor fontColor" (click)="spinWheel()">SPIN!</div>
@@ -13,10 +31,12 @@
   </div>
   <div [class.disabled]="!tabs.Contestants" id="contestantsTab" class="accentColor fontColor">
     <span>Contestant: </span>
-    <input class="text-input" type="text" [(ngModel)]="contestant">
-    <a class="add-btn" (click)="addPeople()">+</a>
+    <input class="text-input" type="text" (keydown.enter)="addPerson()" [(ngModel)]="contestant">
+    <a class="add-btn" (click)="addPerson()">+</a>
+    <a class="paste-btn" (click)="togglePasteList()">Paste List</a>
+    <h2>Contestants</h2>
     <div id="contestantsTabTable" class="namesTabTable accentTableColor">
-      <h6>Contestants</h6>
+
       <div *ngFor="let contestant of tables.contestants">
         <div class="name">{{contestant.name}}</div>
         <a (click)="removeSelectedContestant(contestant.id)">X</a>
@@ -33,8 +53,9 @@
           (click)="selectPattern(pattern)">{{pattern}}
       </li>
     </ul>
+    <h2>Colors</h2>
     <div id="colorsTabTable" class="colorsTabTable accentTableColor fontColor">
-      <h6>Colors</h6>
+
       <div *ngFor="let color of tables.colors" [style.background-color]="color">
         <div>{{color}}</div>
         <a (click)="removeSelectedColor(color)">X</a>
@@ -43,7 +64,9 @@
   </div>
   <div [class.disabled]="!tabs.Setting" id="settingsTab" class="accentColor fontColor">
     <div class="tabHeader">Site Colors
-      <div >Background: <input id="bgColor" type="color" [(ngModel)]="settingInputs.colors.background"> Chroma Key: <div class="template-color" [style.background-color]='"#00b140"' (click)="resetBgColor()"></div></div>
+      <div>Background: <input id="bgColor" type="color" [(ngModel)]="settingInputs.colors.background"> Chroma Key:
+        <div class="template-color" [style.background-color]='"#00b140"' (click)="resetBgColor()"></div>
+      </div>
       <div>Accent: <input id="acColor" type="color" [(ngModel)]="settingInputs.colors.accent"></div>
       <div>Font: <input id="fontColor" type="color" [(ngModel)]="settingInputs.colors.font"></div>
     </div>
@@ -58,8 +81,9 @@
       </div>
     </div>
     <div class="tabHeader">Winner Slide
-      <div>Background Wrapper Color:  <input id="mWColor" type="color" [(ngModel)]="settingInputs.colors.modalBackground"></div>
-      <div>Background Color:  <input id="mColor" type="color" [(ngModel)]="settingInputs.colors.modal"></div>
+      <div>Background Wrapper Color: <input id="mWColor" type="color"
+                                            [(ngModel)]="settingInputs.colors.modalBackground"></div>
+      <div>Background Color: <input id="mColor" type="color" [(ngModel)]="settingInputs.colors.modal"></div>
       <div>Font: <input id="mFColor" type="color" [(ngModel)]="settingInputs.colors.modalFont"></div>
       <!--<div>Background:-->
       <!--<ul class="winnerbg-dropdown">-->
