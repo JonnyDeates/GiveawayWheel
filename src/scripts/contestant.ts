@@ -18,10 +18,10 @@ export function createContestants(arr?: Contestant[]) {
 
 export function addContestant(name: string, callback?: () => void) {
   validateContestant(name);
-  contestants.push({id: cuid(), name: name, sAngle: 0, eAngle: 0, sColor: ''});
+  contestants.push({id: cuid(), name, sAngle: 0, eAngle: 0, sColor: ''});
   callback();
 }
-export function clearContestants(callback?: () => void){
+export function clearContestants(callback?: () => void) {
   contestants.splice(0, contestants.length);
   callback();
   sessionStorage.setItem('contestants', JSON.stringify(contestants));
@@ -35,6 +35,6 @@ export function removeContestant(id: string, callback?: () => void) {
 
 function validateContestant(str: string) {
   if (str.trim() === '') {
-    throw Error('Could not add Contestant, lacking a name')
+    throw Error('Could not add Contestant, lacking a name');
   }
 }

@@ -16,7 +16,7 @@ export interface Settings {
   dialSize: number
 }
 
-export let dialOrientation: string[][] = [['O', 'O', 'O'], ['O', 'R', 'X'], ['O', 'O', 'O']];
+
 let settings: Settings;
 
 export function createSettings(arr?: Settings) {

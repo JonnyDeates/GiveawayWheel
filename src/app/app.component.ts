@@ -5,9 +5,9 @@ import * as $ from 'jquery';
 import * as cuid from "cuid";
 import {addContestant, clearContestants, Contestant, createContestants, removeContestant} from '../scripts/contestant';
 import {addColor, colorPatterns, colorSelection, createColors, removeColor, resetColors} from "../scripts/colors";
-import {createSettings, dialOrientation, Settings} from "../scripts/settings";
+import {createSettings, Settings} from "../scripts/settings";
 import {colorLum, degToRad} from "../scripts/utlilities";
-import {changeDialOrientation} from "../scripts/wheel";
+import {changeDialOrientation, dialOrientation} from "../scripts/wheel";
 
 @Component({
   selector: 'app-root',
@@ -48,7 +48,7 @@ export class AppComponent implements AfterViewInit {
     this.dialOrientation = dialOrientation;
     this.tables = {colors: [], contestants: []}
     this.tabs = {Contestants: true, Colors: false, Setting: false};
-    this.modals = {winner: false, pasteList: {active: true, pasteContestants: '', overideContestants: false}};
+    this.modals = {winner: false, pasteList: {active: false, pasteContestants: '', overideContestants: false}};
     this.tabNames = Object.keys(this.tabs)
     this.wheelRotation = {dialLocation: 0, rate: 1.1, timer: 0, counter: 0, totalRot: 0, rotation: 0};
     this.winnerModal = {winnerText: 'Winner: ', winner: '', winnerImg: ''};
@@ -66,7 +66,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    document.body.style.backgroundColor = this.settingInputs.colors.background; // Green Screen Color
+    document.body.style.backgroundColor = '#abfcff'; // Green Screen Color
     this.canvas = document.getElementById('cnvs') as HTMLCanvasElement; // Gets the Canvas Element
     this.ctx = this.canvas.getContext('2d'); // Context is 2d for the canvas
     this.settingInputs.wheelSize = this.canvas.height;
@@ -157,41 +157,10 @@ export class AppComponent implements AfterViewInit {
     let dial = document.getElementById('dial').style; // Gets the Dial
     let dialImg = document.getElementById('dial').getElementsByTagName('img')[0].style; // Gets the Dial
     let topMargin = 64 + 8 + 101;
-    //let dialChanges = changeDialOrientation(this.settingInputs.wheelSize, this.settingInputs.dialSize, topMargin, this.wheelRotation.dialLocation)
-    switch (this.wheelRotation.dialLocation) {
-      case 45: // Sets the dial location for the second position 000 000 00X
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize + topMargin + 'px';
-        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize * 1.5 + 8 + 'px';
-        break;
-      case 90: // Sets the dial location for the third position 000 000 0X0
-        dial.top = this.settingInputs.wheelSize + this.settingInputs.dialSize + 'px';
-        dial.marginLeft = this.settingInputs.dialSize / 2 + 'px';
-        break;
-      case 135: // Sets the dial location for the fourth position 000 000 X00
-        dial.top = (this.settingInputs.wheelSize) * 3 / 4 + this.settingInputs.dialSize * 1.5 + topMargin + 'px';
-        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize / 2 + 8) + 'px';
-        break;
-      case 180: // Sets the dial location for the fifth position 000 X00 000
-        dial.top = this.settingInputs.wheelSize / 2 + this.settingInputs.dialSize / 2 + topMargin + 'px';
-        dial.marginLeft = -1 * (this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 4) + 'px';
-        break;
-      case 225: // Sets the dial location for the sixth position X00 000 000
-        dial.top = this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize + topMargin + 'px';
-        dial.marginLeft = -1 * ((this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + this.settingInputs.dialSize / 2 + 8) + 'px';
-        break;
-      case 270: // Sets the dial location for the seventh position 0X0 000 000
-        dial.top = -16 + this.settingInputs.dialSize / 2 + topMargin + 'px';
-        dial.marginLeft = -1 * this.settingInputs.dialSize / 2 + 'px';
-        break;
-      case 315: // Sets the dial location for the eigth position 00X 000 000
-        dial.top = -8 + this.settingInputs.wheelSize / 4 - this.settingInputs.dialSize * 1.5 + topMargin + 'px';
-        dial.marginLeft = (this.settingInputs.wheelSize / 4) + this.settingInputs.dialSize + 'px';
-        break;
-      default: // Sets the dial location for the first position 000 00X 000
-        dial.top = topMargin + this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 2 + 'px';
-        dial.marginLeft = (this.settingInputs.wheelSize / 2 - this.settingInputs.dialSize / 4) + 'px';
-        break;
-    }
+    console.log(dial,  this.settingInputs.wheelSize, this.settingInputs.dialSize, this.wheelRotation.dialLocation)
+    let dialChanges = changeDialOrientation(this.settingInputs.wheelSize, this.settingInputs.dialSize, topMargin, this.wheelRotation.dialLocation)
+    dial.top = dialChanges.top;
+    dial.marginLeft = dialChanges.marginLeft;
     // Rotates the dial to whatever is selected as the location
     dial.transform = 'rotate(' + this.wheelRotation.dialLocation + 'deg)';
   }
@@ -344,13 +313,6 @@ export class AppComponent implements AfterViewInit {
     return;
   }
 
-  setDialSize() {
-    let dial = document.getElementById('dial').style;
-    dial.width = '' + this.settingInputs.dialSize;
-    dial.height = '' + this.settingInputs.dialSize;
-    this.changeOrientation();
-  }
-
   setAccentColor() {
     $('.accentColor').css('backgroundColor', this.settingInputs.colors.accent);
     $('.accentTableColor').css('backgroundColor', colorLum(this.settingInputs.colors.accent, 0.2));
@@ -362,7 +324,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   setPageColors() {
-    document.body.style.backgroundColor = this.settingInputs.colors.background; // Sets the Background Color
+    //document.body.style.backgroundColor = this.settingInputs.colors.background; // Sets the Background Color
     document.getElementById('winnerModal').style.backgroundColor = this.settingInputs.colors.modalBackground + 'dd'; // Sets the Wrapper Winner Modal Background
     document.getElementById('winnerModal').getElementsByTagName('div')[0].style.backgroundColor = this.settingInputs.colors.modalBackground; // Sets the Winner Modal Background
     document.getElementById('winnerModal').style.color = this.settingInputs.colors.modalFont; // Sets the Settings Table
