@@ -2,12 +2,13 @@
 import {Component, OnInit, ViewChild, AfterViewInit} from '@angular/core';
 import {Router} from '@angular/router';
 import * as $ from 'jquery';
-import * as cuid from "cuid";
-import {addContestant, clearContestants, Contestant, createContestants, removeContestant} from '../scripts/contestant';
-import {addColor, colorPatterns, colorSelection, createColors, removeColor, resetColors} from "../scripts/colors";
-import {createSettings, Settings} from "../scripts/settings";
-import {colorLum, degToRad} from "../scripts/utlilities";
-import {changeDialOrientation, dialOrientation} from "../scripts/wheel";
+import * as cuid from 'cuid';
+import {addContestant, clearContestants, Contestant, createContestants, removeContestant, toggleEditContestant, submitEditContestant} from '../scripts/contestant';
+import {addColor, colorPatterns, colorSelection, createColors, removeColor, resetColors} from '../scripts/colors';
+import {createSettings, Settings} from '../scripts/settings';
+import {colorLum, degToRad} from '../scripts/utlilities';
+import {changeDialOrientation, dialOrientation} from '../scripts/wheel';
+import {createScoreboard, resetScoreBoard, addScoreboardContestant, removeScoreboardContestant} from '../scripts/scoreboard';
 
 @Component({
   selector: 'app-root',
@@ -33,7 +34,7 @@ export class AppComponent implements AfterViewInit {
   settingInputs: Settings;
 
   modals: { winner: boolean, pasteList: { active: boolean, pasteContestants: string, overideContestants: boolean }, }
-  tables: { colors: string[], contestants: Contestant[] }
+  tables: { colors: string[], contestants: Contestant[], scoreboard: string[]}
 
   // Wheel
   wheelRotation: { dialLocation: number, rate: number, timer: number, counter: number, totalRot: number, rotation: number };
@@ -46,8 +47,8 @@ export class AppComponent implements AfterViewInit {
     this.colorSelector = 'Pattern Selection';
     this.colorPatterns = colorPatterns;
     this.dialOrientation = dialOrientation;
-    this.tables = {colors: [], contestants: []}
-    this.tabs = {Contestants: true, Colors: false, Setting: false};
+    this.tables = {colors: [], contestants: [], scoreboard: []}
+    this.tabs = {Contestants: true, Colors: false, Setting: false, Roster: false};
     this.modals = {winner: false, pasteList: {active: false, pasteContestants: '', overideContestants: false}};
     this.tabNames = Object.keys(this.tabs)
     this.wheelRotation = {dialLocation: 0, rate: 1.1, timer: 0, counter: 0, totalRot: 0, rotation: 0};
@@ -59,6 +60,8 @@ export class AppComponent implements AfterViewInit {
     this.tables.contestants = createContestants(JSON.parse(sessionStorage.getItem('contestants')));
     // Checks the Local Storage to See if there is a registry saved from before if not then creates two default colors
     this.tables.colors = createColors(JSON.parse(sessionStorage.getItem('colors')));
+
+    this.tables.scoreboard = createScoreboard(JSON.parse(sessionStorage.getItem('scoreboard')));
     resetColors(this.tables.contestants, this.colorSelector);
 
     this.cssAnimation = document.createElement('style');
@@ -104,10 +107,7 @@ export class AppComponent implements AfterViewInit {
 
   addPeople() {
     let participantList = this.modals.pasteList.pasteContestants.split(/\n/);
-    console.log(participantList);
-
     participantList = participantList.filter(str => str.trim() !== '');
-    console.log(participantList);
     if (this.modals.pasteList.overideContestants && participantList.length > 0) {
       clearContestants(() => {
         for (let participant of participantList) {
@@ -128,7 +128,8 @@ export class AppComponent implements AfterViewInit {
   }
 
   // Checks Contestant Winner
-  checkWinner() {
+  checkWinner(): string {
+    let winner = '';
     this.wheelRotation.rotation = this.wheelRotation.totalRot % 360; // Gets the mod of the total rotation and sets rotation to that
     this.tables.contestants.forEach((contestant) => { // Iterates through each Contestant
       const leftBound = ((180 * contestant.sAngle) / (Math.PI) + this.wheelRotation.rotation) % 360, // This gets the left bound angle of the contestant converts to Degrees and then adds the current rotation to that, then gets the mod of that
@@ -136,13 +137,16 @@ export class AppComponent implements AfterViewInit {
       if (leftBound < rightBound) { // Checks to see if the left bound is greater than the right bound
         if (this.wheelRotation.dialLocation >= leftBound && this.wheelRotation.dialLocation <= rightBound) { //Checks to see if the dial is inbetween the bounds
           this.winnerModal.winner = contestant.name; // Sets the winner
+          winner = contestant.name;
         }
       } else {
         if (this.wheelRotation.dialLocation <= leftBound && this.wheelRotation.dialLocation <= rightBound) {  // Checks to see if the bounds looping around has the dial between it
           this.winnerModal.winner = contestant.name; // Sets the winner
+          winner = contestant.name;
         }
       }
     });
+    return winner;
   }
 
   toggleWinnerModal() {
@@ -157,7 +161,6 @@ export class AppComponent implements AfterViewInit {
     let dial = document.getElementById('dial').style; // Gets the Dial
     let dialImg = document.getElementById('dial').getElementsByTagName('img')[0].style; // Gets the Dial
     let topMargin = 64 + 8 + 101;
-    console.log(dial,  this.settingInputs.wheelSize, this.settingInputs.dialSize, this.wheelRotation.dialLocation)
     let dialChanges = changeDialOrientation(this.settingInputs.wheelSize, this.settingInputs.dialSize, topMargin, this.wheelRotation.dialLocation)
     dial.top = dialChanges.top;
     dial.marginLeft = dialChanges.marginLeft;
@@ -228,17 +231,26 @@ export class AppComponent implements AfterViewInit {
   }
 
   // Removes the Selected Contestant
-  removeSelectedContestant(id) {
+  removeSelectedContestant(id: string) {
     removeContestant(id, () => this.refreshWheel());
   }
-
-
+  toggleEditContestant(id: string) {
+    toggleEditContestant(id, ()=> this.refreshWheel());
+  }
+  submitEditContestant(id: string, name: string) {
+    submitEditContestant(id, name, ()=> this.refreshWheel());
+  }
   // Removes the Selected Color
   removeSelectedColor(Color: string) {
     removeColor(Color, () => {
       resetColors(this.tables.contestants, this.colorSelector);
       this.refreshWheel();
     });
+  }
+
+  clearScoreboardList(){
+    resetScoreBoard();
+    this.tables.scoreboard = [];
   }
 
   resetBgColor() {
@@ -256,32 +268,21 @@ export class AppComponent implements AfterViewInit {
       setTimeout(() => {
         document.getElementById('spinbtn').classList.remove('disabled');
       }, this.settingInputs.spinTime); // Removes the field of disabled to the Spin Button
-      this.checkWinner(); // Calls the check winner function
+      const winner = this.checkWinner(); // Gets the most recent winner
+      addScoreboardContestant(winner, ()=>{})  // Calls the check winner function & sets the most recent winner on the scoreboard
       document.getElementById('winnerModal').className = '';
       document.getElementById('winnerModal').style.animation = 'fade-in 1s forwards';
     } else {
       this.wheelRotation.totalRot += this.wheelRotation.rate;
-      if (reverseTimer < rTimer / 5.5) {
-        this.wheelRotation.rate = (((reverseTimer) * .00390625) / (this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate));
-      } else if (reverseTimer < rTimer / 5) {
-        this.wheelRotation.rate = ((reverseTimer * .0078125) / (this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate));
-      } else if (reverseTimer < rTimer / 4.5) {
-        this.wheelRotation.rate = ((reverseTimer * .015625) / (this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate));
-      } else if (reverseTimer < rTimer / 4) {
-        this.wheelRotation.rate = ((reverseTimer * .03125) / (this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate));
-      } else if (reverseTimer < rTimer / 3.5) {
-        this.wheelRotation.rate = ((Math.random() * reverseTimer * .0625) / (this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate));
-      } else if (reverseTimer < rTimer / 3) {
-        this.wheelRotation.rate = ((Math.random() * reverseTimer * .125) / (this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate));
-      } else if (reverseTimer < rTimer / 2.5) {
-        this.wheelRotation.rate = ((Math.random() * reverseTimer * .25) / (this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate));
-      } else if (reverseTimer < rTimer / 2) {
-        this.wheelRotation.rate = ((Math.random() * reverseTimer * .5) / (this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate));
-      } else {
-        this.wheelRotation.rate = ((Math.random() * reverseTimer) + reverseTimer / (this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate));
+      for (let i = 100; i > 2; i -= 0.25) { // Exponetial if statements to have a slow and smooth transition out of the rotation.
+        if (reverseTimer < rTimer / i) {
+          this.wheelRotation.rate = (((reverseTimer) * 1 / i ) / (this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate));
+          break;
+        } else { // Where the Randomness and Chaos is Generated, the spining itself of the wheel.
+          this.wheelRotation.rate = ((Math.random() * reverseTimer) + reverseTimer / (this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate * this.settingInputs.spinRate));
+        }
       }
-
-      document.getElementById('cnvs').style.transform = `rotate(${this.wheelRotation.totalRot}deg)`; // Rotates the canvas by the
+      document.getElementById('cnvs').style.transform = `rotate(${this.wheelRotation.totalRot}deg)`; // Rotates the canvas by the given amount
     }
   }
 
@@ -367,7 +368,7 @@ export class AppComponent implements AfterViewInit {
     this.wheelRotation.counter = 0;
     this.wheelRotation.rate = parseFloat(JSON.parse(JSON.stringify(this.settingInputs.spinRate))) * 1.61803398875;
     document.getElementById('spinbtn').classList.add('disabled'); // Adds the field of disabled to the Spin Button
-    this.wheelRotation.timer = (100 * this.settingInputs.spinTime); // The total timer, each 10 is a second, each digit increase is a 10 degree turn. 36 = 3.6 seconds and a complete 360 degree rotation if the rate is at 1.
+    this.wheelRotation.timer = (24 * this.settingInputs.spinTime); // The total timer, each 10 is a second, each digit increase is a 10 degree turn. 36 = 3.6 seconds and a complete 360 degree rotation if the rate is at 1.
     const intervalId = setInterval(() => this.rotateWheel(intervalId, this.wheelRotation.timer), 1);
   }
 }

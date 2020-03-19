@@ -38,8 +38,11 @@
     <div id="contestantsTabTable" class="namesTabTable accentTableColor">
 
       <div *ngFor="let contestant of tables.contestants">
-        <div class="name">{{contestant.name}}</div>
+        <div class="name" (dblclick)="toggleEditContestant(contestant.id)">{{(contestant.isEditing) ? '' : contestant.name}}
+          <input #inputEle [value]="contestant.name" (keyup.enter)="submitEditContestant(contestant.id, inputEle.value)" [hidden]="!contestant.isEditing"/></div>
         <a (click)="removeSelectedContestant(contestant.id)">X</a>
+        <a (click)="toggleEditContestant(contestant.id);" [hidden]="contestant.isEditing">+</a>
+        <a (click)="submitEditContestant(contestant.id, inputEle.value);" [hidden]="!contestant.isEditing">+</a>
       </div>
     </div>
   </div>
@@ -92,5 +95,13 @@
       <!--</div>-->
       <div>Winner Text: <input id='winnerInput' type="text" [(ngModel)]="winnerModal.winnerText"></div>
     </div>
+  </div>
+  <div [class.disabled]="!tabs.Roster" id="rosterTab" class="accentColor fontColor">
+    <h2>Last 15 Winning Contestants</h2>
+    <a class="add-btn" (click)="clearScoreboardList()">Clear List</a>
+
+    <ol>
+      <li *ngFor="let contestant of tables.scoreboard">{{contestant}}</li>
+    </ol>
   </div>
 </div>

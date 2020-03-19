@@ -7,13 +7,13 @@ export interface Settings {
     modal: string,
     modalBackground: string,
     modalFont: string
-  },
-  customImage: string,
-  wheelSize: number,
-  fontSize: number,
-  spinTime: number,
-  spinRate: number,
-  dialSize: number
+  };
+  customImage: string;
+  wheelSize: number;
+  fontSize: number;
+  spinTime: number;
+  spinRate: number;
+  dialSize: number;
 }
 
 
@@ -27,7 +27,7 @@ export function createSettings(arr?: Settings) {
       spinBtn: '#ffffff',
       font: '#000000',
       modal: '#ffffff',
-      modalBackground: '#000000dd',
+      modalBackground: 'rgba(141,158,250,0.87)',
       modalFont: '#000000'
     },
     customImage: null,

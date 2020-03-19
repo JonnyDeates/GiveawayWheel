@@ -2,8 +2,8 @@
 export let dialOrientation: string[][] = [['O', 'O', 'O'], ['O', 'R', 'X'], ['O', 'O', 'O']];
 
 export function changeDialOrientation(WheelSize, DialSize, topMargin, dialLocation) {
+  // Changes the Dials Orientation
   const dial = {top: '', marginLeft: ''};
-  console.log(dialLocation);
   switch (dialLocation) {
     case 45: // Sets the dial location for the second position 000 000 00X
       dial.top = (WheelSize) * 3 / 4 + DialSize + topMargin + 'px';

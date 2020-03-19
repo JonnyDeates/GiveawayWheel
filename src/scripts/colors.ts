@@ -1,8 +1,8 @@
 import {Contestant} from "./contestant";
 
 interface SelectedColor {
-  id: string,
-  color: string
+  id: string;
+  color: string;
 }
 
 export let colorPatterns: string[] = ['abcd', 'ababcdcd', 'aabccd', 'abbcdd', 'abababcdcdcd', 'random', 'totalRandom'];
@@ -107,12 +107,12 @@ export function removeColor(Color: string, callback?: () => void) {
 
 function validateColor(str: string) {
   if (str.trim() === '') {
-    throw Error('Could Not Add Color, Please Enter a Color')
+    throw Error('Could Not Add Color, Please Enter a Color');
   } else if (str.substring(0, 1) !== '#') {
-    throw Error('Could Not Add Color Not in Hex Format')
+    throw Error('Could Not Add Color Not in Hex Format');
   } else if (str.length === 69) {
     throw Error('Nice');
-  } else if (str.length < 7 || str.length > 7) {
-    throw Error('Color Not the Proper Length')
+  } else if (str.length === 7 || str.length === 9) {
+    throw Error('Color Not the Proper Length');
   }
 }
