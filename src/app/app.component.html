@@ -67,10 +67,10 @@
   </div>
   <div [class.disabled]="!tabs.Setting" id="settingsTab" class="accentColor fontColor">
     <div class="tabHeader">Site Colors
-      <div>Background: <input id="bgColor" type="color" [(ngModel)]="settingInputs.colors.background"> Chroma Key:
+      <div>Background: <input id="bgColor" type="color" (ngModelChange)="setPageColors('background')" [(ngModel)]="settingInputs.colors.background"> Chroma Key:
         <div class="template-color" [style.background-color]='"#00b140"' (click)="resetBgColor()"></div>
       </div>
-      <div>Accent: <input id="acColor" type="color" [(ngModel)]="settingInputs.colors.accent"></div>
+      <div>Accent: <input id="acColor" type="color" (ngModelChange)="setPageColors('accents')" [(ngModel)]="settingInputs.colors.accent"></div>
       <div>Font: <input id="fontColor" type="color" [(ngModel)]="settingInputs.colors.font"></div>
     </div>
     <div class="tabHeader"> Wheel

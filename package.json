@@ -1,6 +1,6 @@
 {
   "name": "giveawaywheel",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -58,5 +58,5 @@
   "bugs": {
     "url": "https://github.com/JonnyDeates/GiveawayWheel/issues"
   },
-  "homepage": ""
+  "homepage": "https://github.com/JonnyDeates/GiveawayWheel#readme"
 }
